@@ -1,29 +1,37 @@
 # The Living Atlas
 
-A fantasy world that runs by itself. Open `index.html` in a browser and watch it.
+A fantasy world that runs by itself. Open `index.html` in a browser and watch it grow, fight, pray, trade and fall apart.
 
-Each world starts from a random seed. The seed sets the continent, its mountains, rivers and climates. A handful of peoples (humans, elves, dwarves, orcs, halflings) light their first fires, and every second a few more years pass:
+## What the world does
 
-- **Settlements** grow on fertile land and send out settlers. Hamlets become towns, then great cities.
-- **Realms** claim territory, unite tribes into kingdoms and kingdoms into empires. Rulers age, die and pass the crown on. Some successions end in civil war.
-- **Diplomacy**: neighbours form alliances and go to war over borders, faith and old grudges. Wars move borders, cities get besieged, captured or razed, and whole realms fall.
-- **Faiths** are founded by prophets and spread by missionaries, or survive in secret.
-- **Monsters**: dragons, giants and liches rise and attack towns. Heroes ride out to slay them, and some heroes end up on the throne.
-- **Plagues, famines, earthquakes, floods, wonders, golden ages and comets** give each world its own history.
-- **Eras** get named after what defines them, like a hegemon's ascendancy or an age of strife.
+Each world grows from a random seed: continents with ridged mountain chains, rivers that widen toward the sea, climates from glaciers to jungle, and resources (iron, gold, gemstones, timber, horses, spices, fisheries, wine). Peoples settle the land, and every second a few more years pass:
 
-Everything is written into the **Chronicle**. Great events also go into the **Legends**. Click any name, on the map or in the text, to read its story.
+- **Realms**: humans, elves, dwarves, orcs and halflings found settlements, claim land, and grow from tribes into kingdoms and empires. Every realm has a procedurally drawn coat of arms with a proper blazon. Realms that break away inherit their parent's arms with a difference mark.
+- **Rulers and dynasties**: rulers have traits (Wise, Cruel, Ambitious, Builder, Seafarer…). They age and die, and each realm keeps its line of rulers. Succession crises and revolts split realms apart.
+- **Economy**: territory and cities fill a treasury. Roads link each realm's holdings. Caravan roads and sea lanes open between peaceful cities, adding wealth and goodwill. Treasuries pay for wonders, swell armies, and get looted, ransomed and paid as tribute.
+- **War**: wars start over borders, faith or old grudges, and allies honour their oaths. Armies gather at the front, cities are besieged, captured or razed, and whole realms fall.
+- **The sea**: harbour cities send colonists across the water to plant overseas colonies.
+- **Great people**: scholars write treatises, artists paint frescoes, generals win battles, explorers chart distant shores, and archmages unlock new magic. Sometimes an archmage blights the land with wild magic.
+- **Monsters and heroes**: dragons, giants, liches and sea serpents prey on towns. Heroes hunt them, and the famous ones may be raised to the throne.
+- **Faith, plague and climate**: prophets found religions, missionaries spread them, and heresies survive in secret. Plagues, famines, earthquakes, eruptions and floods strike. Long winters frost the map, and volcanic ash and magical blight scar the land for generations.
+- **Eras** are named after what defines them, such as a hegemon's ascendancy, an age of sails or the Frost Years.
 
-## Controls
+## How to watch
 
-- **Pause / Resume**, and the speed buttons for 1, 3, 10 or 30 years per second.
-- **Map modes**: Realms, Faiths or Terrain.
-- **Scroll or pinch** to zoom and **drag** to pan. Hover over the map for details and click to inspect.
-- **New world** asks you to confirm, then rolls a new seed.
+- **Map modes**: Realms, Peoples, Faiths, Trade, Population, Diplomacy (relative to the selected realm) and Terrain.
+- **Codex tabs**: *Chronicle* (filterable, with icons), *Realms* (sortable by population, territory, treasury or age), *Figures* (monsters, heroes and great people), *Ages* (a timeline of every realm's lifespan across the eras) and *Inspect* (a full page for any realm, city, ruin, war, monster or person).
+- **Follow** flies the camera to great events. **Clouds** toggles the drifting clouds. **Music** starts a generative soundtrack with cues for wars, coronations and catastrophes.
+- Scroll or pinch to zoom, drag to pan, and hover or click anything. Space pauses.
 
-The world is saved in your browser. When you come back it catches up: two years pass for every minute you were away, up to 250 years, and a summary shows what happened.
+The world is saved in your browser. When you come back it catches up (two years per minute away, up to 250) and summarises what happened.
 
-## Files
+## Building
 
-- `world.html` is the page itself (styles, simulation and renderer in one file, no dependencies besides Google Fonts).
-- `index.html` is the standalone version, generated by `./build.sh`. Rebuild it after editing `world.html`.
+The source lives in `src/` (`core`, `terrain`, `heraldry`, `sim`, `render`, `audio`, `ui`, `main`, plus `style.css` and `shell.html`). `./build.sh` inlines everything into `world.html` (the published page) and `index.html` (standalone).
+
+`src/icons.js` is generated by `tools/extract_icons.py` from the `@iconify-json/game-icons` npm package.
+
+## Credits
+
+- Icons: [game-icons.net](https://game-icons.net) by Lorc, Delapouite and contributors, licensed [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/).
+- Fonts: Uncial Antiqua, Cormorant, Alegreya Sans and JetBrains Mono from Google Fonts (SIL Open Font License).
