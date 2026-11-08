@@ -1,0 +1,1264 @@
+<title>The Living Atlas</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&family=IM+Fell+English:ital@1&family=Alegreya+Sans:ital,wght@0,400;0,500;0,700;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a cartographer's night desk. The map is the table; the chronicle is the ledger beside it. */
+:root{
+  --bg:#10171a;
+  --panel:#162023;
+  --panel-2:#1c292d;
+  --line:#2a3a3e;
+  --fg:#ebe2cf;
+  --muted:#93a19b;
+  --brass:#d3aa5e;
+  --brass-dim:#7d6a45;
+  --blood:#d4664c;
+  --sea:#17304a;
+  --f-display:'IM Fell English SC','Iowan Old Style',Georgia,serif;
+  --f-italic:'IM Fell English','Iowan Old Style',Georgia,serif;
+  --f-body:'Alegreya Sans','Gill Sans','Trebuchet MS',sans-serif;
+  --f-mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;
+  color-scheme:dark;
+}
+html,body{height:100%}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:15px;line-height:1.45}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+button,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--brass);outline-offset:2px}
+
+.app{height:100%;display:grid;grid-template-rows:auto minmax(0,1fr);gap:12px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:12px}
+
+/* ---------- header ---------- */
+.bar{display:flex;flex-wrap:wrap;align-items:center;gap:10px 28px}
+.brand{display:flex;flex-direction:column;min-width:0}
+.brand h1{font-family:var(--f-display);font-weight:400;font-size:30px;line-height:1;margin:0;letter-spacing:.02em;text-wrap:balance}
+.era{font-family:var(--f-italic);font-style:italic;color:var(--brass);font-size:16px;margin-top:3px}
+.clock{display:flex;align-items:baseline;gap:8px}
+.clock .lbl{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.clock .yr{font-family:var(--f-mono);font-size:26px;font-variant-numeric:tabular-nums;min-width:4.5ch}
+.controls{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-left:auto}
+.btn{background:var(--panel-2);border:1px solid var(--line);border-radius:3px;padding:6px 12px;font-size:14px;line-height:1.2}
+.btn:hover{border-color:var(--brass-dim)}
+.btn.primary{background:var(--brass);color:#1b1408;border-color:var(--brass);font-weight:700;min-width:84px}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn.warn{border-color:var(--blood);color:var(--blood)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:3px;overflow:hidden}
+.seg button{background:var(--panel);border:0;border-right:1px solid var(--line);padding:6px 10px;font-family:var(--f-mono);font-size:13px}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed="true"]{background:var(--panel-2);color:var(--brass);box-shadow:inset 0 -2px 0 var(--brass)}
+.stats{display:flex;flex-wrap:wrap;gap:4px 16px;font-size:13px;color:var(--muted);width:100%}
+.stats b{color:var(--fg);font-weight:500;font-family:var(--f-mono);font-size:12.5px}
+
+/* ---------- stage ---------- */
+.stage{display:grid;grid-template-columns:minmax(0,1fr) 390px;gap:12px;min-height:0}
+.mapcol{display:grid;grid-template-rows:minmax(0,1fr) 128px;gap:12px;min-height:0;min-width:0}
+.mapwrap{position:relative;border:1px solid var(--line);border-radius:3px;overflow:hidden;background:var(--sea);min-height:0}
+#map{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:grab;touch-action:none}
+#map.dragging{cursor:grabbing}
+.overlay{position:absolute;display:flex;gap:6px;align-items:center}
+.ov-mode{left:10px;bottom:10px}
+.ov-zoom{right:10px;bottom:10px}
+.ov-zoom .btn{width:34px;padding:5px 0;text-align:center;background:rgba(22,32,35,.88)}
+.ov-mode .seg{background:rgba(22,32,35,.88)}
+.ov-mode .seg button{font-family:var(--f-body);font-size:13px;background:transparent}
+.tip{position:absolute;pointer-events:none;background:rgba(16,23,26,.94);border:1px solid var(--line);border-radius:3px;padding:6px 9px;font-size:13px;max-width:240px;line-height:1.35;z-index:3}
+.tip .k{color:var(--muted)}
+.loading{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--f-italic);font-style:italic;font-size:20px;color:var(--brass);background:var(--sea)}
+.banner{position:absolute;left:50%;top:14px;transform:translateX(-50%);width:min(560px,calc(100% - 28px));background:rgba(16,23,26,.96);border:1px solid var(--brass-dim);border-radius:3px;padding:14px 16px;z-index:4;box-shadow:0 10px 30px rgba(0,0,0,.45)}
+.banner h3{margin:0 0 6px;font-family:var(--f-display);font-weight:400;font-size:20px;color:var(--brass)}
+.banner ul{margin:6px 0 10px;padding-left:18px;font-size:14px}
+.banner li{margin:3px 0}
+
+.chartwrap{position:relative;border:1px solid var(--line);border-radius:3px;background:var(--panel);min-width:0}
+#chart{position:absolute;inset:0;width:100%;height:100%;display:block}
+.chart-cap{position:absolute;left:52px;top:6px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);pointer-events:none}
+.chart-tip{position:absolute;top:22px;pointer-events:none;background:rgba(16,23,26,.94);border:1px solid var(--line);padding:5px 8px;font-size:12px;border-radius:3px;white-space:nowrap}
+
+/* ---------- side ---------- */
+.side{display:flex;flex-direction:column;min-height:0;min-width:0;border:1px solid var(--line);border-radius:3px;background:var(--panel)}
+.tabs{display:flex;border-bottom:1px solid var(--line)}
+.tabs button{flex:1;background:none;border:0;padding:10px 6px 9px;font-family:var(--f-display);font-size:16px;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-1px}
+.tabs button[aria-selected="true"]{color:var(--fg);border-bottom-color:var(--brass)}
+.tabs button:hover{color:var(--fg)}
+.pane{flex:1;overflow:auto;min-height:0;padding:10px 14px 16px}
+.pane-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px}
+.pane-head label{font-size:12px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+.pane-head select{background:var(--panel-2);border:1px solid var(--line);border-radius:3px;padding:3px 6px;font-size:13px}
+
+.log{list-style:none;margin:0;padding:0}
+.log li{display:grid;grid-template-columns:3.6em minmax(0,1fr);gap:8px;padding:6px 0;border-bottom:1px solid rgba(42,58,62,.6);font-size:14px}
+.log li .y{font-family:var(--f-mono);font-size:12px;color:var(--muted);padding-top:2px;font-variant-numeric:tabular-nums}
+.log li.i0{color:var(--muted);font-size:13px}
+.log li.i2 .t{color:var(--fg)}
+.log li.i2 .y{color:var(--brass)}
+.log li.i3{display:block;border-bottom:0;padding:14px 0 6px;text-align:center}
+.log li.i3 .y{display:block;color:var(--brass);font-size:11px}
+.log li.i3 .t{font-family:var(--f-display);font-size:19px;color:var(--brass)}
+.log li.fresh{animation:fresh 1.6s ease-out}
+@keyframes fresh{from{background:rgba(211,170,94,.16)}to{background:transparent}}
+.ref{color:inherit;text-decoration:none;border-bottom:1px dotted var(--muted);cursor:pointer}
+.ref:hover{color:var(--brass);border-bottom-color:var(--brass)}
+.ref.r::before{content:"";display:inline-block;width:.62em;height:.62em;border-radius:1px;background:var(--c);margin-right:.3em;vertical-align:.04em;box-shadow:0 0 0 1px rgba(0,0,0,.35)}
+.ref.b{color:#f08a68}
+.hero{font-style:italic;color:var(--brass)}
+
+.realm-row{display:grid;grid-template-columns:12px minmax(0,1fr) auto;gap:10px;align-items:center;padding:8px 6px;border-bottom:1px solid rgba(42,58,62,.6);cursor:pointer;border-radius:2px}
+.realm-row:hover{background:var(--panel-2)}
+.sw{width:12px;height:12px;border-radius:2px;background:var(--c);box-shadow:0 0 0 1px rgba(0,0,0,.4)}
+.realm-row .nm{font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.realm-row .sub{font-size:12.5px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.realm-row .num{text-align:right;font-family:var(--f-mono);font-size:12.5px;font-variant-numeric:tabular-nums}
+.realm-row .num small{display:block;color:var(--muted);font-size:11px}
+.chip{display:inline-block;font-size:11px;letter-spacing:.06em;text-transform:uppercase;padding:1px 6px;border-radius:2px;border:1px solid currentColor;margin-left:6px;vertical-align:1px}
+.chip.war{color:var(--blood)}
+.chip.gold{color:var(--brass)}
+details.fallen{margin-top:14px}
+details.fallen summary{cursor:pointer;color:var(--muted);font-size:13px;letter-spacing:.06em;text-transform:uppercase;padding:4px 0}
+.fallen .realm-row{opacity:.7}
+
+.detail h2{font-family:var(--f-display);font-weight:400;font-size:24px;line-height:1.1;margin:4px 0 2px;text-wrap:balance;display:flex;gap:10px;align-items:center}
+.detail h2 .sw{width:16px;height:16px;flex:none}
+.detail .kicker{color:var(--muted);font-size:13.5px;margin-bottom:12px}
+.detail h4{font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:500;margin:16px 0 6px}
+.kv{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 14px}
+.kv div{min-width:0}
+.kv .k{font-size:11.5px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+.kv .v{font-family:var(--f-mono);font-size:14px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.meter{height:5px;background:var(--panel-2);border-radius:2px;margin-top:4px;overflow:hidden}
+.meter i{display:block;height:100%;background:var(--brass)}
+.ruler{background:var(--panel-2);border:1px solid var(--line);border-radius:3px;padding:9px 11px;font-size:14px}
+.ruler .nm{font-family:var(--f-display);font-size:17px}
+.trait{display:inline-block;font-size:12px;padding:0 6px;border:1px solid var(--line);border-radius:2px;margin:4px 4px 0 0;color:var(--muted)}
+.mini{list-style:none;margin:0;padding:0;font-size:14px}
+.mini li{display:flex;justify-content:space-between;gap:10px;padding:3px 0;border-bottom:1px dashed rgba(42,58,62,.7)}
+.mini li span:last-child{font-family:var(--f-mono);font-size:12.5px;color:var(--muted);white-space:nowrap}
+.rel{display:inline-block;width:56px;height:6px;background:var(--panel-2);border-radius:2px;position:relative;vertical-align:middle;margin-left:6px}
+.rel i{position:absolute;top:0;bottom:0;left:50%}
+.empty{color:var(--muted);font-size:14px;padding:16px 4px;line-height:1.5}
+.close{float:right;margin-top:6px}
+
+@media (max-width:920px){
+  html,body{height:auto}
+  .app{height:auto}
+  .stage{grid-template-columns:minmax(0,1fr)}
+  .mapcol{grid-template-rows:auto 112px}
+  .mapwrap{aspect-ratio:180/112;height:auto}
+  .side{height:70vh}
+  .controls{margin-left:0}
+  .brand h1{font-size:25px}
+}
+@media (prefers-reduced-motion:reduce){.log li.fresh{animation:none}}
+</style>
+
+<div class="app">
+  <header class="bar">
+    <div class="brand">
+      <h1 id="worldName">The Living Atlas</h1>
+      <div class="era" id="eraName">&nbsp;</div>
+    </div>
+    <div class="clock"><span class="lbl">Year</span><span class="yr" id="year">0</span></div>
+    <div class="controls">
+      <button class="btn primary" id="playBtn" type="button">Pause</button>
+      <div class="seg" role="group" aria-label="Years per second" id="speedSeg">
+        <button type="button" data-s="1" aria-pressed="false">1 yr/s</button>
+        <button type="button" data-s="3" aria-pressed="true">3</button>
+        <button type="button" data-s="10" aria-pressed="false">10</button>
+        <button type="button" data-s="30" aria-pressed="false">30</button>
+      </div>
+      <button class="btn" id="newBtn" type="button">New world</button>
+    </div>
+    <div class="stats" id="stats"></div>
+  </header>
+
+  <main class="stage">
+    <div class="mapcol">
+      <section class="mapwrap" id="mapwrap" aria-label="World map">
+        <canvas id="map"></canvas>
+        <div class="tip" id="tip" hidden></div>
+        <div class="overlay ov-mode">
+          <div class="seg" role="group" aria-label="Map mode" id="modeSeg">
+            <button type="button" data-m="realms" aria-pressed="true">Realms</button>
+            <button type="button" data-m="faith" aria-pressed="false">Faiths</button>
+            <button type="button" data-m="terrain" aria-pressed="false">Terrain</button>
+          </div>
+        </div>
+        <div class="overlay ov-zoom">
+          <button class="btn" type="button" id="zin" aria-label="Zoom in">+</button>
+          <button class="btn" type="button" id="zout" aria-label="Zoom out">&minus;</button>
+          <button class="btn" type="button" id="zreset" aria-label="Fit map">&#8634;</button>
+        </div>
+        <div class="banner" id="banner" hidden></div>
+        <div class="loading" id="loading">Raising mountains&hellip;</div>
+      </section>
+      <section class="chartwrap" aria-label="Population by realm over time">
+        <canvas id="chart"></canvas>
+        <div class="chart-cap">Population by realm</div>
+        <div class="chart-tip" id="chartTip" hidden></div>
+      </section>
+    </div>
+
+    <aside class="side">
+      <div class="tabs" role="tablist">
+        <button type="button" role="tab" id="tab-chronicle" aria-selected="true" data-tab="chronicle">Chronicle</button>
+        <button type="button" role="tab" id="tab-realms" aria-selected="false" data-tab="realms">Realms</button>
+        <button type="button" role="tab" id="tab-legends" aria-selected="false" data-tab="legends">Legends</button>
+        <button type="button" role="tab" id="tab-inspect" aria-selected="false" data-tab="inspect">Inspect</button>
+      </div>
+      <div class="pane" id="pane-chronicle" role="tabpanel">
+        <div class="pane-head">
+          <label for="logFilter">Show</label>
+          <select id="logFilter">
+            <option value="0">Everything</option>
+            <option value="1" selected>Notable events</option>
+            <option value="2">Only great events</option>
+          </select>
+        </div>
+        <ul class="log" id="log"></ul>
+      </div>
+      <div class="pane" id="pane-realms" role="tabpanel" hidden></div>
+      <div class="pane" id="pane-legends" role="tabpanel" hidden><ul class="log" id="legends"></ul></div>
+      <div class="pane detail" id="pane-inspect" role="tabpanel" hidden></div>
+    </aside>
+  </main>
+</div>
+
+<script>
+'use strict';
+/* =====================================================================
+   THE LIVING ATLAS — a self-running fantasy world
+   ===================================================================== */
+const W=180,H=110,N=W*H,K=4,PW=W*K,PH=H*K;
+const SAVE_KEY='living-atlas-v1';
+const $=s=>document.querySelector(s);
+const clamp=(v,a,b)=>v<a?a:v>b?b:v;
+const lerp=(a,b,t)=>a+(b-a)*t;
+const cap1=s=>s.charAt(0).toUpperCase()+s.slice(1).toLowerCase();
+const d2=(ax,ay,bx,by)=>{const dx=ax-bx,dy=ay-by;return dx*dx+dy*dy};
+function roman(n){const m=[[10,'X'],[9,'IX'],[5,'V'],[4,'IV'],[1,'I']];let s='';for(const[v,r]of m)while(n>=v){s+=r;n-=v}return s}
+function fmt(n){n=Math.round(n);if(n>=1e6)return(n/1e6).toFixed(n>=1e7?0:1)+'M';if(n>=1e4)return Math.round(n/1e3)+'k';if(n>=1e3)return(n/1e3).toFixed(1)+'k';return String(n)}
+function fmtDead(n){n=Math.round(n);if(n<1000)return n.toLocaleString('en-US');return(Math.round(n/100)*100).toLocaleString('en-US')}
+const ORD=['','First','Second','Third','Fourth','Fifth','Sixth','Seventh','Eighth','Ninth','Tenth'];
+
+/* ---------- randomness ---------- */
+let S=null, G=null;            // S: saved world state, G: terrain derived from seed
+const X={};                     // per-year derived caches (never saved)
+function rand(){let a=S.rng=(S.rng+0x6D2B79F5)|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}
+const ri=(a,b)=>a+Math.floor(rand()*(b-a+1));
+const pick=a=>a[Math.floor(rand()*a.length)];
+const chance=p=>rand()<p;
+function wpick(arr,f){let t=0;for(const a of arr)t+=Math.max(0,f(a));if(t<=0)return arr[0];let r=rand()*t;for(const a of arr){r-=Math.max(0,f(a));if(r<=0)return a}return arr[arr.length-1]}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(rand()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function mulberry(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+
+/* ---------- noise ---------- */
+function hash2(x,y,s){let h=(Math.imul(x|0,374761393)+Math.imul(y|0,668265263)+Math.imul(s|0,982451653))|0;h=Math.imul(h^(h>>>13),1274126177);h^=h>>>16;return(h>>>0)/4294967296}
+function vnoise(x,y,s){const xi=Math.floor(x),yi=Math.floor(y),xf=x-xi,yf=y-yi;const u=xf*xf*(3-2*xf),v=yf*yf*(3-2*yf);
+  const a=hash2(xi,yi,s),b=hash2(xi+1,yi,s),c=hash2(xi,yi+1,s),d=hash2(xi+1,yi+1,s);return a+(b-a)*u+(c-a)*v+(a-b-c+d)*u*v}
+function fbm(x,y,s,oct){let sum=0,amp=.5,f=1,norm=0;for(let i=0;i<oct;i++){sum+=amp*vnoise(x*f,y*f,s+i*101);norm+=amp;amp*=.5;f*=2.03}return sum/norm}
+
+/* ---------- biomes ---------- */
+const B={DEEP:0,SEA:1,PLAINS:2,FOREST:3,JUNGLE:4,DESERT:5,SAVANNA:6,TUNDRA:7,SNOW:8,SWAMP:9,HILLS:10,MOUNTAIN:11,PEAK:12,TAIGA:13};
+const BIOME=[
+  {n:'Deep ocean',c:[29,59,85],f:0},{n:'Coastal sea',c:[47,92,120],f:0},
+  {n:'Grassland',c:[151,160,92],f:1},{n:'Forest',c:[84,114,60],f:.7},{n:'Jungle',c:[56,100,58],f:.6},
+  {n:'Desert',c:[208,182,124],f:.12},{n:'Savanna',c:[182,165,96],f:.6},{n:'Tundra',c:[146,154,142],f:.22},
+  {n:'Glacier',c:[226,230,232],f:0},{n:'Marsh',c:[88,104,76],f:.35},{n:'Hills',c:[136,132,90],f:.5},
+  {n:'Mountains',c:[120,111,101],f:.18},{n:'High peaks',c:[212,208,202],f:0},{n:'Taiga',c:[74,100,82],f:.38},
+];
+const isLand=b=>b>1;
+
+/* ---------- peoples ---------- */
+//              DEEP SEA PLN FOR JUN DES SAV TUN SNW SWP HIL MTN PEK TAI
+const RACES={
+  human:   {n:'Human',   pl:'humans',   habit:[0,0,1,.6,.35,.25,.75,.2,0,.3,.6,.15,0,.4],  grow:1,   expand:1,   aggr:.5,  martial:1,   life:1,   weapon:'the sword'},
+  elf:     {n:'Elven',   pl:'elves',    habit:[0,0,.45,1,.9,.05,.35,.1,0,.4,.35,.1,0,.7], grow:.72, expand:.8,  aggr:.3,  martial:1.3, life:4,   weapon:'the bow'},
+  dwarf:   {n:'Dwarven', pl:'dwarves',  habit:[0,0,.3,.3,.1,.15,.2,.35,.05,.1,1,.9,.2,.4],grow:.82, expand:.7,  aggr:.35, martial:1.4, life:2.2, weapon:'the axe'},
+  orc:     {n:'Orcish',  pl:'orcs',     habit:[0,0,.85,.4,.3,.7,.8,.5,.05,.5,.6,.35,0,.4], grow:1.1, expand:1.2, aggr:.85, martial:1.25,life:.85, weapon:'the cleaver'},
+  halfling:{n:'Halfling',pl:'halflings',habit:[0,0,1,.55,.2,.1,.5,.15,0,.25,.8,.05,0,.2],  grow:1.15,expand:.9,  aggr:.12, martial:.6,  life:1.3, weapon:'a borrowed sword'},
+};
+const RK=Object.keys(RACES);
+const ENMITY={'elf|orc':-35,'dwarf|orc':-35,'dwarf|elf':-12,'human|orc':-15,'halfling|orc':-20,'halfling|human':10,'dwarf|human':5,'elf|halfling':8};
+const NM={
+  human:{ps:['Al','Bran','Cor','Dun','Ed','Fal','Gar','Hal','Ost','Mer','Ral','Tor','Wes','Ash','Ber','Card','Lin','Mar','Sel','Ver','Rot','Sten','Kel','Ald','Bel','Hen','Wyn','Thorn','Ead','Grey'],
+    pe:['ford','wick','ham','mere','dale','gate','holm','bury','stead','moor','haven','ton','field','crest','bridge','march','wall','cross'],
+    ce:['ia','or','and','mark','eth','ara','orn','ence','ain','on'],gm:['ric','win','ald','an','old','ard','mund','bert','hal','os'],gf:['a','wyn','is','elle','ane','ith','ild','ora','enna']},
+  elf:{ps:['Ae','Ith','Sil','Cal','Lir','Fae','Ny','El','Thal','Ser','Vael','Ili','Aru','Mel','Syl','Quel','Ora','Tir','Esh','Lua'],
+    pe:['thil','wen','ara','lis','dor','las','ien','andel','eth','iel','ora','vyn','rith','sael'],
+    ce:['ae','eth','ion','ara','essa','iel','ond'],gm:['ion','as','ir','andil','ael','orin'],gf:['iel','wen','ara','ys','ethe','aine']},
+  dwarf:{ps:['Bar','Dur','Grom','Thar','Kor','Brun','Mor','Bal','Dvor','Hald','Rag','Thrum','Ost','Gund','Vorn','Bror','Hurn','Skal','Thor','Drak'],
+    pe:['hold','delve','forge','deep','gard','mount','heim','anvil','rock','vault','hall','stone'],
+    ce:['ak','um','ar','und','eth','grim','orn'],gm:['in','ak','ur','or','grim','ok','rek','rik','li'],gf:['a','is','hild','ra','dis','una']},
+  orc:{ps:['Gor','Ugr','Mak','Zug','Kra','Ruk','Grash','Nar','Ghor','Thok','Vrak','Skar','Brug','Yaz','Durz','Mog','Lug','Rak','Ozz','Krag'],
+    pe:['ash','gul','mak','rok','zar','gash','thul','dush','kar','grot','mok'],
+    ce:['ash','ul','ak','oth','uz','ar'],gm:['ash','ug','ok','nak','gor','ruk','az','th'],gf:['a','ka','sha','ga','zha']},
+  halfling:{ps:['Bram','Pip','Tull','Mer','Nib','Ros','Wil','Hob','Fen','Clov','Tam','Bel','Dob','Lob','Bun','Mil','Pud','Hal','Sam','Tod'],
+    pe:['bottom','burrow','hollow','well','by','combe','field','brook','ley','dell','wick','green'],
+    ce:['ley','ford','wood','dale','mead'],gm:['o','in','y','bert','ry','ock','wise'],gf:['a','ie','ly','sa','belle','ry']},
+};
+const GOV={
+  human:[['Tribes of {c}','{c} Clans'],['Kingdom of {c}','Principality of {c}','Grand Duchy of {c}','Holy Realm of {c}'],['{c} Empire','Empire of {c}']],
+  elf:[['{c} Circle','Wildfolk of {c}'],['Realm of {c}','{c} Concord','High Court of {c}'],['{c} Dominion','Eternal Court of {c}']],
+  dwarf:[['Clan {c}','{c} Kin'],['{c} Hold','Mountain Kingdom of {c}','{c} Thanedom'],['Under-Empire of {c}','{c} High Kingdom']],
+  orc:[['{c} Warband','{c} Tribe'],['{c} Horde','Khaganate of {c}','{c} Warlordship'],['Great Horde of {c}','{c} Dread Empire']],
+  halfling:[['{c} Hamlets','{c} Folk'],['{c} Commonwealth','Free Fields of {c}','{c} Mootland'],['{c} Confederacy','Grand Moot of {c}']],
+};
+const TITLES={
+  human:[['Chieftain','Chieftain'],['King','Queen'],['Emperor','Empress']],
+  elf:[['Elder','Elder'],['High Lord','High Lady'],['Eternal Sovereign','Eternal Sovereign']],
+  dwarf:[['Clanfather','Clanmother'],['Thane-King','Thane-Queen'],['High King','High Queen']],
+  orc:[['Warchief','Warchief'],['Khan','Khatun'],['Overlord','Overlord']],
+  halfling:[['Elder','Elder'],['Mayor','Mayor'],['Moot-Speaker','Moot-Speaker']],
+};
+const TRAITS={Wise:{st:1},Just:{st:1,ag:-.1,rel:4},Cruel:{st:-1,ag:.2,rel:-8},Ambitious:{ag:.25},Brave:{ag:.1},Craven:{ag:-.2},Pious:{pi:1},Scholar:{te:1},Mad:{st:-1.5,ag:.3},Greedy:{st:-.5},Gentle:{ag:-.25,st:.5,rel:6}};
+const TRAIT_KEYS=Object.keys(TRAITS);
+const TECH=['bronze tools','iron smelting','written law','steel forging','runecraft','the arcane lattice','clockwork engines','aether sails'];
+const TECH_AGE=['Bronze','Iron','Law','Steel','Runes','Arcana','Clockwork','Aether'];
+
+/* ---------- names ---------- */
+function placeName(race){const n=NM[race];for(let k=0;k<8;k++){const s=cap1(pick(n.ps)+pick(n.pe)).replace(/(.)\1\1/g,'$1$1');if(!X.names||!X.names.has(s)){X.names&&X.names.add(s);return s}}return cap1(pick(n.ps)+pick(n.pe))}
+function coreName(race){const n=NM[race];return cap1(pick(n.ps)+pick(n.ce))}
+function given(race,f){const n=NM[race];return cap1(pick(n.ps)+pick(f?n.gf:n.gm))}
+function worldName(){return pick(['Ae','Thal','Vor','Ery','Os','Mir','Kal','Ula','Ser','Ith','Bra'])+pick(['dora','ethis','anor','yssia','ia','undar','eth','aris','enmoor','oth'])}
+const WAR_N=['Crowns','Ashes','the Broken Oath','Thorns','Salt','the Iron Pass','the Red Banner','Ravens','the Severed Hand','Embers','Three Rivers','the Pale Sun','Tears','Lanterns','Bells','the Long Winter','the Burning Bridges','Silver'];
+const CAUSES=['a border dispute','a murdered envoy','a stolen relic','an insult to the crown','grazing rights','a broken marriage pact','old grudges','river tolls','a disputed heir','the mountain passes','a raided caravan'];
+const F_A=['Burning','Silver','Drowned','Hollow','Eternal','Weeping','Golden','Nameless','Ashen','Starlit','Thousandfold','Iron','Pale','Sleeping','Seventh'];
+const F_B=['Eye','Stag','King','Mother','Flame','Tree','Serpent','Moon','Wheel','Crown','Hand','Tide','Lantern','Choir','Gate'];
+const F_P=['Church of the {x}','Way of the {x}','Cult of the {x}','Covenant of the {x}','Children of the {x}','Order of the {x}'];
+const PL_A=['Grey','Red','Weeping','Crimson','Pale','Laughing','Withering','Blue','Black','Sleeping'];
+const PL_B=['Fever','Pox','Cough','Rot','Death','Blight','Sweat','Plague'];
+const WON_A=['Glass','Starfall','Golden','Ivory','Ever-Burning','Singing','Endless','Moonlit','Iron','Crystal','Hundred-Bell','Sunken'];
+const WON_B=['Spire','Library','Lighthouse','Observatory','Cathedral','Colossus','Arcanum','Bridge','Gardens','Ziggurat','Hall of Ancestors','Amphitheatre'];
+
+/* ---------- terrain ---------- */
+function fields(nx,ny,seed){
+  const A=W/H,X0=nx*A*2.6,Y0=ny*2.6;
+  const wx=(fbm(X0*.8,Y0*.8,seed+11,3)-.5)*1.6,wy=(fbm(X0*.8+9.1,Y0*.8+3.7,seed+17,3)-.5)*1.6;
+  let e=fbm(X0+wx,Y0+wy,seed,6);
+  const dx=Math.abs(nx-.5)*2,dy=Math.abs(ny-.5)*2,d=Math.max(dx,dy*.95);
+  e=e-Math.pow(d,5)*.45+.02*(1-d);
+  return [e,fbm(X0*1.3+40,Y0*1.3+11,seed+31,4),fbm(X0*1.1+70,Y0*1.1+5,seed+47,3)];
+}
+function tempAt(ny,e,tn,G){return(1-Math.abs(ny-.5)*2)*.85+(tn-.5)*.6+.12-Math.max(0,e-G.sea)*1.6}
+function biomeOf(e,m,t,G){
+  if(e<G.sea)return e<G.sea-.05?B.DEEP:B.SEA;
+  if(e>G.peak)return B.PEAK;
+  if(e>G.mount)return B.MOUNTAIN;
+  if(t<.1)return B.SNOW;
+  if(t<.24)return B.TUNDRA;
+  if(e>G.hill)return B.HILLS;
+  if(t<.38)return m>.45?B.TAIGA:B.TUNDRA;
+  if(m<.3)return t>.55?B.DESERT:B.PLAINS;
+  if(m>.7&&e<G.sea+.035)return B.SWAMP;
+  if(t>.72)return m>.58?B.JUNGLE:B.SAVANNA;
+  if(m>.52)return B.FOREST;
+  return B.PLAINS;
+}
+function genTerrain(seed){
+  const elev=new Float32Array(N),mo=new Float32Array(N),tn=new Float32Array(N);
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++){const f=fields((x+.5)/W,(y+.5)/H,seed),i=y*W+x;elev[i]=f[0];mo[i]=f[1];tn[i]=f[2]}
+  const sorted=Float32Array.from(elev).sort();const si=Math.floor(N*.55);
+  const land=sorted.subarray(si);
+  const g={seed,sea:sorted[si],hill:land[Math.floor(land.length*.72)],mount:land[Math.floor(land.length*.88)],peak:land[Math.floor(land.length*.975)],
+    mMin:1,mMax:0,elev,biome:new Uint8Array(N),fert:new Float32Array(N),river:new Uint8Array(N),coast:new Uint8Array(N),best:new Float32Array(N),nearMtn:new Uint8Array(N),land:0,rivers:[]};
+  for(let i=0;i<N;i++){if(mo[i]<g.mMin)g.mMin=mo[i];if(mo[i]>g.mMax)g.mMax=mo[i]}
+  const nm=m=>clamp((m-g.mMin)/(g.mMax-g.mMin),0,1);
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++){const i=y*W+x;g.biome[i]=biomeOf(elev[i],nm(mo[i]),tempAt((y+.5)/H,elev[i],tn[i],g),g)}
+  // rivers
+  const lr=mulberry(seed^0x2545F491);
+  const src=[];for(let i=0;i<N;i++){const b=g.biome[i];if((b===B.HILLS||b===B.MOUNTAIN)&&nm(mo[i])>.42)src.push(i)}
+  for(let i=src.length-1;i>0;i--){const j=Math.floor(lr()*(i+1));[src[i],src[j]]=[src[j],src[i]]}
+  let landN=0;for(let i=0;i<N;i++)if(isLand(g.biome[i]))landN++;g.land=landN;
+  const want=Math.round(landN/320);
+  for(const s of src){
+    if(g.rivers.length>=want)break;if(g.river[s])continue;
+    const path=[s],seen=new Set([s]);let cur=s,ok=false;
+    for(let step=0;step<260;step++){
+      const cx=cur%W,cy=(cur/W)|0;let best=-1,be=1e9;
+      for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){if(!dx&&!dy)continue;const x=cx+dx,y=cy+dy;if(x<0||y<0||x>=W||y>=H)continue;const j=y*W+x;if(seen.has(j))continue;const e=elev[j]+(dx&&dy?.002:0);if(e<be){be=e;best=j}}
+      if(best<0||be>elev[cur]+.015)break;
+      path.push(best);seen.add(best);
+      if(!isLand(g.biome[best])||g.river[best]){ok=true;break}
+      cur=best;
+    }
+    if(ok&&path.length>=6){for(const c of path)if(isLand(g.biome[c]))g.river[c]=1;g.rivers.push(path)}
+  }
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++){const i=y*W+x,b=g.biome[i];if(!isLand(b))continue;
+    let co=0,mt=0;for(let dy=-2;dy<=2;dy++)for(let dx=-2;dx<=2;dx++){const xx=x+dx,yy=y+dy;if(xx<0||yy<0||xx>=W||yy>=H)continue;const bb=g.biome[yy*W+xx];if(Math.abs(dx)+Math.abs(dy)===1&&!isLand(bb))co=1;if(bb===B.MOUNTAIN||bb===B.PEAK)mt=1}
+    g.coast[i]=co;g.nearMtn[i]=mt;g.fert[i]=BIOME[b].f+(g.river[i]?.35:0)+(co?.15:0);
+    let bh=0;for(const r of RK)bh=Math.max(bh,RACES[r].habit[b]);g.best[i]=bh;
+  }
+  // painted terrain
+  const cvs=document.createElement('canvas');cvs.width=PW;cvs.height=PH;const c2=cvs.getContext('2d');
+  const img=c2.createImageData(PW,PH),d=img.data,Ep=new Float32Array(PW*PH),Bp=new Uint8Array(PW*PH);
+  for(let py=0;py<PH;py++)for(let px=0;px<PW;px++){const ny=(py+.5)/PH,f=fields((px+.5)/PW,ny,seed),i=py*PW+px;Ep[i]=f[0];Bp[i]=biomeOf(f[0],nm(f[1]),tempAt(ny,f[0],f[2],g),g)}
+  for(let py=0;py<PH;py++)for(let px=0;px<PW;px++){
+    const i=py*PW+px,b=Bp[i],e=Ep[i];let r,gg,bl;
+    if(b<=1){const t=clamp((g.sea-e)/.13,0,1);r=lerp(70,20,t);gg=lerp(118,46,t);bl=lerp(140,72,t);if(g.sea-e<.005){r+=26;gg+=26;bl+=22}}
+    else{const c=BIOME[b].c;r=c[0];gg=c[1];bl=c[2];
+      const en=px>0&&py>0?Ep[i-PW-1]:e;const sh=clamp((e-en)*30,-.38,.38)*(b>=10&&b<=12?1.6:1);const m=1+sh;r*=m;gg*=m;bl*=m;
+      if(e-g.sea<.004){r=lerp(r,206,.45);gg=lerp(gg,190,.45);bl=lerp(bl,146,.45)}}
+    const gr=(hash2(px,py,seed+7)-.5)*9;
+    d[i*4]=clamp(r+gr,0,255);d[i*4+1]=clamp(gg+gr,0,255);d[i*4+2]=clamp(bl+gr,0,255);d[i*4+3]=255;
+  }
+  c2.putImageData(img,0,0);
+  c2.save();c2.scale(K,K);c2.lineCap='round';c2.lineJoin='round';
+  for(const p of g.rivers){
+    c2.beginPath();const pt=j=>[(j%W)+.5,((j/W)|0)+.5];let [x0,y0]=pt(p[0]);c2.moveTo(x0,y0);
+    for(let k=1;k<p.length-1;k++){const[a,b]=pt(p[k]),[c,dd]=pt(p[k+1]);c2.quadraticCurveTo(a,b,(a+c)/2,(b+dd)/2)}
+    const[lx,ly]=pt(p[p.length-1]);c2.lineTo(lx,ly);
+    c2.strokeStyle='rgba(58,104,134,.95)';c2.lineWidth=.32;c2.stroke();
+  }
+  c2.restore();
+  g.canvas=cvs;
+  return g;
+}
+
+/* ---------- references for the chronicle ---------- */
+const art=n=>n.startsWith('Clan ')?'':'the ';
+const rn=r=>art(r.name)+`<a class="ref r" data-ref="r${r.id}" style="--c:${r.color}">${r.name}</a>`;
+const rnB=r=>`<a class="ref r" data-ref="r${r.id}" style="--c:${r.color}">${r.name}</a>`;
+const rnOld=(r,name)=>art(name)+`<a class="ref r" data-ref="r${r.id}" style="--c:${r.color}">${name}</a>`;
+const sn=s=>`<a class="ref s" data-ref="s${s.id}">${s.name}</a>`;
+const bn=b=>`<a class="ref b" data-ref="b${b.id}">${b.name}</a>`;
+const hn=h=>`<span class="hero">${h.name}${h.ep?' '+h.ep:''}</span>`;
+let fresh=[]; const fx=[];
+function log(imp,text,refs,x,y){
+  if(text.startsWith('the '))text='T'+text.slice(1);
+  const e={y:S.year,t:text,i:imp,r:(refs||[]).filter(Boolean)};
+  S.log.push(e);if(S.log.length>700)S.log.splice(0,S.log.length-700);
+  if(imp>=2){S.legends.push(e);if(S.legends.length>320)S.legends.splice(0,S.legends.length-320)}
+  fresh.push(e);
+  if(x!=null&&!X.silent)fx.push({x,y,t:performance.now(),c:imp>=2?'#f1c060':'#f4ecd8'});
+}
+
+/* ---------- realms, rulers, settlements ---------- */
+function realmColor(id){const h=(id*137.508+S.seed%360)%360,s=48+(id*7%3)*8,l=50+(id*11%3)*5;return{css:`hsl(${h.toFixed(1)} ${s}% ${l}%)`,rgb:hsl2rgb(h,s/100,l/100)}}
+function hsl2rgb(h,s,l){const k=n=>(n+h/30)%12,a=s*Math.min(l,1-l),f=n=>l-a*Math.max(-1,Math.min(k(n)-3,9-k(n),1));return[Math.round(f(0)*255),Math.round(f(8)*255),Math.round(f(4)*255)]}
+function realmName(r){return r.custom||GOV[r.race][r.tier][r.tmpl%GOV[r.race][r.tier].length].replace('{c}',r.core)}
+function makeRealm(race,o={}){
+  const id=S.realms.length,c=realmColor(id);
+  const r={id,race,core:coreName(race),tier:o.tier??0,tmpl:ri(0,9),custom:o.custom||null,color:c.css,rgb:c.rgb,founded:S.year,alive:true,cap:-1,
+    dynasty:placeName(race),tech:o.tech??0,stab:60,faith:o.faith??S.raceFaith[race],golden:0,regnal:{},parent:o.parent??null,fell:null,peak:0,ruler:null};
+  r.name=realmName(r);r.ruler=newRuler(r);S.realms.push(r);return r;
+}
+function newRuler(r,o={}){
+  const f=o.f??chance(.4),name=o.name||given(r.race,f),n=(r.regnal[name]||0)+1;r.regnal[name]=n;
+  const traits=o.traits||[];while(traits.length<(chance(.45)?2:1)){const t=pick(TRAIT_KEYS);if(!traits.includes(t))traits.push(t)}
+  return{name,n,f,born:S.year-Math.round(ri(16,36)*RACES[r.race].life),crowned:S.year,traits,dyn:r.dynasty};
+}
+const title=r=>TITLES[r.race][r.tier][r.ruler.f?1:0];
+const rulerStr=(r,ru=r.ruler)=>`${TITLES[r.race][r.tier][ru.f?1:0]} ${ru.name}${ru.n>1?' '+roman(ru.n):''}`;
+const hasT=(r,t)=>r.ruler.traits.includes(t);
+const kind=p=>p<400?'Hamlet':p<1500?'Village':p<6000?'Town':p<20000?'City':'Great city';
+function addSettlement(r,cell,pop){
+  const s={id:S.nid++,name:placeName(r.race),x:cell%W,y:(cell/W)|0,cell,realm:r.id,pop,founded:S.year,w:[]};
+  S.sets.push(s);S.owner[cell]=r.id;
+  for(const[dx,dy]of[[1,0],[-1,0],[0,1],[0,-1]]){const x=s.x+dx,y=s.y+dy;if(x<0||y<0||x>=W||y>=H)continue;const j=y*W+x;if(S.owner[j]<0&&isLand(G.biome[j]))S.owner[j]=r.id}
+  return s;
+}
+const setsOf=id=>X.sets[id]||[];
+function agg(){
+  const n=S.realms.length,sets=[],pop=new Float64Array(n),at=new Map();
+  for(let k=0;k<n;k++)sets.push([]);
+  for(const s of S.sets){sets[s.realm].push(s);pop[s.realm]+=s.pop;at.set(s.cell,s)}
+  X.sets=sets;X.pop=pop;X.at=at;X.atWar=new Set();for(const w of S.wars){X.atWar.add(w.a);X.atWar.add(w.b)}
+}
+const bkey=(a,b)=>a<b?a*4096+b:b*4096+a;
+const rkey=(a,b)=>a<b?a+'-'+b:b+'-'+a;
+function computeBorders(){
+  const n=S.realms.length,cells=new Int32Array(n),sx=new Float64Array(n),sy=new Float64Array(n),border=new Map(),free=[],byR=[];
+  for(let k=0;k<n;k++)byR.push([]);
+  const o=S.owner,bi=G.biome;
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++){const i=y*W+x,a=o[i];
+    if(a>=0){cells[a]++;sx[a]+=x;sy[a]+=y;byR[a].push(i)}else if(isLand(bi[i])&&G.best[i]>=.5)free.push(i);
+    if(x<W-1){const b=o[i+1];if(a!==b&&a>=0&&b>=0){const k=bkey(a,b);border.set(k,(border.get(k)||0)+1)}}
+    if(y<H-1){const b=o[i+W];if(a!==b&&a>=0&&b>=0){const k=bkey(a,b);border.set(k,(border.get(k)||0)+1)}}
+  }
+  X.cells=cells;X.sx=sx;X.sy=sy;X.border=border;X.free=free;X.byR=byR;
+}
+function power(r){return(X.pop[r.id]||0)/100*RACES[r.race].martial*(1+r.tech*.08)*(.6+r.stab/250)*(hasT(r,'Brave')?1.1:1)}
+function aggr(r){let a=RACES[r.race].aggr;for(const t of r.ruler.traits)a+=TRAITS[t].ag||0;return clamp(a,.02,1.2)}
+function near(x,y){
+  let best=null,bd=1e9;for(const s of S.sets){const d=d2(s.x,s.y,x,y);if(d<bd){bd=d;best=s}}
+  if(best&&bd<=100)return`near ${sn(best)}`;
+  const v=y<H*.33?'north':y>H*.66?'south':'',h=x<W*.33?'west':x>W*.66?'east':'';
+  return v||h?`in the wild ${v&&h?v+'-'+h:v||h}`:'in the wild heartlands';
+}
+function findWar(a,b){return S.wars.find(w=>(w.a===a&&w.b===b)||(w.a===b&&w.b===a))}
+
+/* =====================================================================
+   SIMULATION — one call is one year
+   ===================================================================== */
+function stepYear(){
+  S.year++;
+  agg();computeBorders();
+  growSettlements();
+  expandTerritory();
+  if(S.year%4===0)decayTerritory();
+  foundSettlements();
+  agg();diplomacy();
+  warStep();
+  agg();rulerStep();upkeep();
+  agg();beastStep();heroStep();events();
+  spawnPeoples();
+  eraCheck();
+  if(S.year%5===0)recordHist();
+  dirtyPol=true;
+}
+
+function growSettlements(){
+  for(const s of S.sets){
+    const r=S.realms[s.realm],R=RACES[r.race];let lf=0;
+    for(let dy=-2;dy<=2;dy++)for(let dx=-2;dx<=2;dx++){const x=s.x+dx,y=s.y+dy;if(x<0||y<0||x>=W||y>=H)continue;const i=y*W+x;if(S.owner[i]===s.realm||S.owner[i]<0)lf+=G.fert[i]}
+    lf/=25;
+    const cap=(500+lf*15000)*R.grow*(1+r.tech*.07)*(r.cap===s.id?1.45:1)*(r.golden>S.year?1.15:1)+s.w.length*2500;
+    let rate=.035*(1-s.pop/cap);if(X.atWar.has(r.id))rate-=.004;
+    s.pop=Math.max(25,s.pop*(1+rate+(rand()-.5)*.012));
+  }
+}
+function buildReach(mult){
+  const reach=[];for(let k=0;k<S.realms.length;k++)reach.push([]);
+  for(const s of S.sets){const R=2.6+Math.sqrt(s.pop)/20;reach[s.realm].push(s.x,s.y,R*R*mult)}
+  return reach;
+}
+function inReach(arr,x,y){for(let k=0;k<arr.length;k+=3)if(d2(arr[k],arr[k+1],x,y)<=arr[k+2])return true;return false}
+const DIRS=[[1,0],[-1,0],[0,1],[0,-1]];
+function expandTerritory(){
+  const reach=buildReach(1),claims=[],o=S.owner;
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++){const i=y*W+x;if(o[i]>=0||!isLand(G.biome[i]))continue;
+    const st=(rand()*4)|0;let own=-1;
+    for(let k=0;k<4;k++){const[dx,dy]=DIRS[(st+k)&3],xx=x+dx,yy=y+dy;if(xx<0||yy<0||xx>=W||yy>=H)continue;const q=o[yy*W+xx];if(q>=0){own=q;break}}
+    if(own<0)continue;const r=S.realms[own];
+    if(!inReach(reach[own],x,y))continue;
+    if(chance(.13*RACES[r.race].habit[G.biome[i]]*RACES[r.race].expand))claims.push(i,own);
+  }
+  for(let k=0;k<claims.length;k+=2)o[claims[k]]=claims[k+1];
+}
+function decayTerritory(){
+  const reach=buildReach(1.8),o=S.owner;
+  for(let i=0;i<N;i++){const a=o[i];if(a<0)continue;if(!S.realms[a].alive){o[i]=-1;continue}
+    if(!inReach(reach[a],i%W,(i/W)|0)&&chance(.35))o[i]=-1}
+}
+function tooClose(x,y,m){const m2=m*m;for(const s of S.sets)if(d2(s.x,s.y,x,y)<m2)return true;return false}
+function foundSettlements(){
+  for(const r of S.realms){if(!r.alive)continue;
+    const ss=setsOf(r.id);if(!ss.length)continue;
+    const avg=X.pop[r.id]/ss.length;const p=clamp((avg-700)/5000,0,.35)*RACES[r.race].expand;
+    if(!chance(p))continue;
+    const cells=X.byR[r.id];if(!cells||!cells.length)continue;
+    let best=-1,bs=0;
+    for(let t=0;t<24;t++){const c=cells[(rand()*cells.length)|0];const x=c%W+ri(-3,3),y=((c/W)|0)+ri(-3,3);if(x<0||y<0||x>=W||y>=H)continue;
+      const i=y*W+x;if(!isLand(G.biome[i]))continue;if(S.owner[i]!==r.id&&S.owner[i]!==-1)continue;
+      const h=RACES[r.race].habit[G.biome[i]];if(h<.25)continue;if(tooClose(x,y,4))continue;
+      const sc=G.fert[i]*h+rand()*.15;if(sc>bs){bs=sc;best=i}}
+    if(best<0)continue;
+    const src=ss.reduce((a,b)=>b.pop>a.pop?b:a);const moved=Math.min(src.pop*.15,ri(150,400));src.pop-=moved;
+    const ns=addSettlement(r,best,moved);
+    log(0,`Settlers from ${sn(src)} founded ${sn(ns)}.`,['r'+r.id,'s'+ns.id,'s'+src.id],ns.x,ns.y);
+  }
+}
+
+/* ---------- diplomacy & war ---------- */
+function traitRel(r){let v=0;for(const t of r.ruler.traits)v+=TRAITS[t].rel||0;if(hasT(r,'Mad'))v+=(rand()-.5)*20;return v}
+function allyCount(id){let n=0;for(const k in S.allies){const[a,b]=k.split('-').map(Number);if(a===id||b===id)n++}return n}
+function diplomacy(){
+  for(const[k,bc]of X.border){
+    const a=Math.floor(k/4096),b=k%4096,A=S.realms[a],B2=S.realms[b];if(!A.alive||!B2.alive)continue;
+    const key=rkey(a,b);let rel=S.rel[key]??0;
+    const target=(A.race===B2.race?15:0)+(ENMITY[A.race+'|'+B2.race]??ENMITY[B2.race+'|'+A.race]??0)+(A.faith===B2.faith?20:-12)-Math.min(30,bc*.25)+(S.allies[key]?25:0)+traitRel(A)+traitRel(B2);
+    rel=clamp(rel+(target-rel)*.06+(rand()-.5)*10,-100,100);S.rel[key]=rel;
+    if(findWar(a,b)||(S.truce[key]||0)>S.year)continue;
+    if(!S.allies[key]&&rel>50&&chance(.025)&&allyCount(a)<3&&allyCount(b)<3){
+      S.allies[key]=S.year;log(1,`${rn(A)} and ${rn(B2)} swore an alliance.`,['r'+a,'r'+b]);
+    }else if(S.allies[key]&&rel<5){
+      delete S.allies[key];log(1,`The alliance between ${rn(A)} and ${rn(B2)} collapsed in mutual suspicion.`,['r'+a,'r'+b]);
+    }else if(!S.allies[key]&&rel<-25){
+      const pa=power(A),pb=power(B2);const atkA=aggr(A)*pa>=aggr(B2)*pb;
+      const att=atkA?A:B2,def=atkA?B2:A,ratio=clamp((atkA?pa:pb)/((atkA?pb:pa)+1),.3,3);
+      if(chance((.006+(-rel-25)*.0009)*aggr(att)*ratio))declareWar(att,def);
+    }
+  }
+}
+function warName(att,def){
+  let base=chance(.5)?`The War of ${pick(WAR_N)}`:`The ${att.core}–${def.core} War`;
+  const c=S.wn[base]=(S.wn[base]||0)+1;
+  if(c>1)base=base.replace('The ',`The ${ORD[c]||c+'th'} `);
+  return base;
+}
+function declareWar(att,def,name,cause){
+  const key=rkey(att.id,def.id);delete S.allies[key];
+  cause=cause||(att.faith!==def.faith&&hasT(att,'Pious')?'heresy, proclaiming a holy war':pick(CAUSES));
+  name=name||warName(att,def);
+  S.wars.push({id:S.nid++,a:att.id,b:def.id,start:S.year,name,score:0});
+  const big=setsOf(att.id).length>=3&&setsOf(def.id).length>=3;
+  log(big?2:1,`${rn(att)} declared war on ${rn(def)} over ${cause}. So began ${name}.`,['r'+att.id,'r'+def.id]);
+  for(const k in S.allies){const[a,b]=k.split('-').map(Number);if(a!==def.id&&b!==def.id)continue;const o=a===def.id?b:a;const O=S.realms[o];
+    if(o===att.id||!O.alive||findWar(o,att.id)||!chance(.65))continue;
+    S.wars.push({id:S.nid++,a:o,b:att.id,start:S.year,name,score:0});
+    log(1,`${rn(O)} honoured its oath to ${rn(def)} and marched against ${rn(att)}.`,['r'+o,'r'+att.id,'r'+def.id]);
+  }
+}
+function warStep(){
+  for(const w of S.wars.slice()){
+    if(!S.wars.includes(w))continue;
+    const A=S.realms[w.a],B2=S.realms[w.b];if(!A.alive||!B2.alive){S.wars.splice(S.wars.indexOf(w),1);continue}
+    const bc=X.border.get(bkey(w.a,w.b))||0,dur=S.year-w.start;
+    if(bc>0){
+      const pa=power(A)*(.5+rand()),pb=power(B2)*1.1*(.5+rand());
+      const Wn=pa>pb?A:B2,L=pa>pb?B2:A,ratio=Math.max(pa,pb)/Math.max(1,Math.min(pa,pb));
+      const took=flipCells(Wn,L,Math.floor(Math.min(28,(ratio-1)*7+rand()*4)));
+      w.score+=(Wn===A?1:-1)*took;
+      if(L.alive&&ratio>1.4&&chance(.3))siege(Wn,L);
+      for(const s of S.sets){if(s.realm===L.id)s.pop*=.985;else if(s.realm===Wn.id)s.pop*=.993}
+      if(L.alive&&chance(.3))battle(w,Wn,L);
+    }
+    if(!S.wars.includes(w))continue;
+    if(chance(.025+dur*.006+(bc===0?.25:0)+(Math.abs(w.score)>60?.08:0)))makePeace(w);
+  }
+}
+function flipCells(Wn,L,n){
+  if(n<=0)return 0;const cand=[],o=S.owner;
+  for(const i of X.byR[L.id]||[]){if(o[i]!==L.id)continue;const x=i%W,y=(i/W)|0;
+    for(const[dx,dy]of DIRS){const xx=x+dx,yy=y+dy;if(xx<0||yy<0||xx>=W||yy>=H)continue;if(o[yy*W+xx]===Wn.id){cand.push(i);break}}}
+  shuffle(cand);let took=0;
+  for(const i of cand){if(took>=n||!L.alive)break;
+    const s=X.at.get(i);
+    if(s&&!s.dead&&s.realm===L.id){if(chance(.35))captureSettlement(s,Wn,L);else continue}
+    else o[i]=Wn.id;
+    took++;
+  }
+  return took;
+}
+function siege(Wn,L){
+  const ss=S.sets.filter(s=>s.realm===L.id);let best=null,bd=1e9;
+  for(const s of ss){for(let dy=-3;dy<=3;dy++)for(let dx=-3;dx<=3;dx++){const x=s.x+dx,y=s.y+dy;if(x<0||y<0||x>=W||y>=H)continue;if(S.owner[y*W+x]===Wn.id){const d=dx*dx+dy*dy;if(d<bd){bd=d;best=s}}}}
+  if(best)captureSettlement(best,Wn,L,true);
+}
+function captureSettlement(s,Wn,L,siege){
+  const wasCap=L.cap===s.id;
+  const razeP=(Wn.race==='orc'?.3:.06)+(hasT(Wn,'Cruel')?.2:0);
+  if(chance(razeP)){destroySettlement(s,`was put to the torch by ${rn(Wn)}`,[`r${Wn.id}`,`r${L.id}`]);}
+  else{
+    s.realm=Wn.id;s.pop*=.82;S.owner[s.cell]=Wn.id;
+    for(let dy=-2;dy<=2;dy++)for(let dx=-2;dx<=2;dx++){const x=s.x+dx,y=s.y+dy;if(x<0||y<0||x>=W||y>=H)continue;const j=y*W+x;if(S.owner[j]===L.id&&!X.at.get(j))S.owner[j]=Wn.id}
+    const imp=wasCap||s.pop>6000?2:1;
+    log(imp,wasCap?`${sn(s)}, seat of ${rn(L)}, fell to ${rn(Wn)}${siege?' after a long siege':''}.`:`${rn(Wn)} ${siege?'besieged and took':'captured'} ${sn(s)} from ${rn(L)}.`,['r'+Wn.id,'r'+L.id,'s'+s.id],s.x,s.y);
+  }
+  if(wasCap)relocateCapital(L);
+  if(!S.sets.some(t=>t.realm===L.id))killRealm(L,Wn);
+}
+function destroySettlement(s,how,refs){
+  const i=S.sets.indexOf(s);if(i<0)return;S.sets.splice(i,1);s.dead=true;
+  S.ruins.push({id:S.nid++,sid:s.id,name:s.name,x:s.x,y:s.y,year:S.year,founded:s.founded,w:s.w.map(w=>w.n),peak:Math.round(s.pop)});
+  if(S.ruins.length>140)S.ruins.shift();
+  log(s.pop>5000?2:1,`${sn(s)} ${how}. Only ruins remain.`,['s'+s.id,'r'+s.realm,...(refs||[])],s.x,s.y);
+  const r=S.realms[s.realm];
+  if(r.cap===s.id)relocateCapital(r);
+  if(r.alive&&!S.sets.some(t=>t.realm===r.id))killRealm(r,null);
+}
+function relocateCapital(r){
+  const ss=S.sets.filter(s=>s.realm===r.id);if(!ss.length){r.cap=-1;return}
+  const c=ss.reduce((a,b)=>b.pop>a.pop?b:a);r.cap=c.id;r.stab=Math.max(0,r.stab-15);
+  log(1,`${rn(r)} moved its seat to ${sn(c)}.`,['r'+r.id,'s'+c.id]);
+}
+function killRealm(r,by){
+  if(!r.alive)return;r.alive=false;r.fell=S.year;
+  for(let i=0;i<N;i++)if(S.owner[i]===r.id)S.owner[i]=-1;
+  S.wars=S.wars.filter(w=>w.a!==r.id&&w.b!==r.id);
+  for(const k of Object.keys(S.allies)){const[a,b]=k.split('-').map(Number);if(a===r.id||b===r.id)delete S.allies[k]}
+  for(const k of Object.keys(S.rel)){const[a,b]=k.split('-').map(Number);if(a===r.id||b===r.id)delete S.rel[k]}
+  const age=S.year-r.founded;
+  log(age>40||r.tier>0?2:1,`${rn(r)} fell${by?' to '+rn(by):''}, ${age} years after its founding.`,['r'+r.id,by&&'r'+by.id]);
+}
+function makePeace(w){
+  S.wars.splice(S.wars.indexOf(w),1);
+  const key=rkey(w.a,w.b);S.truce[key]=S.year+ri(15,30);S.rel[key]=Math.max(S.rel[key]||0,-15);
+  const A=S.realms[w.a],B2=S.realms[w.b],dur=S.year-w.start;
+  const res=Math.abs(w.score)<10?'neither side could claim victory':`${rn(w.score>0?A:B2)} prevailed and kept the lands it had taken`;
+  log(dur>=6||Math.abs(w.score)>40?2:1,`${w.name} ended after ${dur} year${dur===1?'':'s'}; ${res}.`,['r'+w.a,'r'+w.b]);
+}
+function battle(w,Wn,L){
+  const wc=S.sets.find(s=>s.id===Wn.cap)||setsOf(Wn.id)[0];if(!wc)return;
+  const ls=S.sets.filter(s=>s.realm===L.id);if(!ls.length)return;
+  const s=ls.reduce((a,b)=>d2(b.x,b.y,wc.x,wc.y)<d2(a.x,a.y,wc.x,wc.y)?b:a);
+  const place=`${s.name} ${pick(['Fields','Ford','Hill','Gate','Bridge','Marsh','Heights','Crossing'])}`;
+  const dead=Math.min(X.pop[Wn.id]||0,X.pop[L.id]||0)*.012*(.5+rand());
+  const h=S.heroes.find(h=>h.alive&&h.realm===Wn.id);
+  let lead='';if(h&&chance(.35)){h.deeds++;lead=`, led by ${hn(h)},`}
+  log(1,`At the Battle of ${place}, ${rn(Wn)}${lead} routed the host of ${rn(L)}. ${fmtDead(dead)} fell.`,['r'+Wn.id,'r'+L.id,'s'+s.id],s.x,s.y);
+}
+
+/* ---------- rulers & realm upkeep ---------- */
+function deathCause(age,war){
+  if(war&&chance(.4))return pick(['fell in battle','was slain leading a charge','died of wounds taken in the war']);
+  if(age<38)return pick(['died of a sudden fever','was thrown from a horse','was poisoned at a feast','drowned crossing a river','died in a hunting accident']);
+  return pick(['died in old age','died peacefully','died after a long illness','passed away, old and grey']);
+}
+function rulerStep(){
+  for(const r of S.realms){if(!r.alive)continue;
+    const ru=r.ruler,age=(S.year-ru.born)/RACES[r.race].life,war=X.atWar.has(r.id);
+    const p=.006+(age>40?(age-40)*.0065:0)+(war?.008:0)+(hasT(r,'Mad')?.01:0);
+    if(chance(p))succession(r,deathCause(age,war));
+  }
+}
+function succession(r,cause){
+  const old=r.ruler,reign=S.year-old.crowned,oldStr=rulerStr(r),ss=setsOf(r.id).length;
+  const hero=S.heroes.find(h=>h.alive&&h.realm===r.id&&h.ep);
+  let txt;
+  if(hero&&chance(.4)){
+    r.dynasty=placeName(r.race);r.ruler=newRuler(r,{name:hero.name,f:hero.f});r.ruler.born=hero.born;hero.alive=false;hero.crowned=S.year;
+    txt=`The people raised the hero ${hn(hero)} to the throne as ${rulerStr(r)}, founding House ${r.dynasty}.`;
+  }else if(chance(.1)){
+    r.dynasty=placeName(r.race);r.ruler=newRuler(r);r.stab-=10;
+    txt=`In the confusion, ${rulerStr(r)} of House ${r.dynasty} seized power.`;
+  }else{
+    r.ruler=newRuler(r);txt=`${rulerStr(r)} succeeded.`;
+  }
+  log(ss>=8||r.tier===2?1:0,`${oldStr} of ${rn(r)} ${cause} after ${reign} year${reign===1?'':'s'} of rule. ${txt}`,['r'+r.id]);
+  if(ss>=8&&chance(.05+(55-r.stab)/250))civilWar(r,'succession');
+}
+function upkeep(){
+  for(const r of S.realms){if(!r.alive)continue;
+    const ss=setsOf(r.id),pop=X.pop[r.id]||0;
+    let st=0;for(const t of r.ruler.traits)st+=TRAITS[t].st||0;
+    const target=60+st*8-Math.max(0,ss.length-8)*1.5-(X.atWar.has(r.id)?10:0)+(r.golden>S.year?15:0);
+    r.stab=clamp(r.stab+(target-r.stab)*.05+(rand()-.5)*3,0,100);
+    if(r.tech<TECH.length-1&&chance(.002+Math.min(.02,pop/2e6)+(hasT(r,'Scholar')?.006:0))){
+      r.tech++;log(ss.length>=2?1:0,`Scholars of ${rn(r)} mastered ${TECH[r.tech]}.`,['r'+r.id]);
+    }
+    if(r.tier===0&&ss.length>=3&&pop>=5000){
+      const old=r.name;r.tier=1;r.custom=null;r.name=realmName(r);
+      log(2,`${rnOld(r,old)} united under ${rulerStr(r)} as ${rn(r)}.`,['r'+r.id]);
+    }else if(r.tier===1&&ss.length>=14&&pop>=120000&&chance(.03)){
+      const old=r.name;r.tier=2;r.name=realmName(r);
+      log(2,`${rulerStr(r)} was crowned in ${sn(S.sets.find(s=>s.id===r.cap)||ss[0])}, and ${rnOld(r,old)} became ${rn(r)}.`,['r'+r.id]);
+    }else if(r.tier===2&&ss.length<5){
+      const old=r.name;r.tier=1;r.name=realmName(r);
+      log(2,`Shrunk to a handful of holdings, ${rnOld(r,old)} was an empire no more. It endured as ${rn(r)}.`,['r'+r.id]);
+    }
+    if(r.golden<S.year&&r.stab>78&&ss.length>=3&&chance(.012)){
+      r.golden=S.year+ri(20,50);log(2,`A golden age dawned in ${rn(r)} under ${rulerStr(r)}.`,['r'+r.id]);
+    }
+    if(ss.length>=7&&r.stab<20&&chance(.05))civilWar(r,'revolt');
+    if(pop>r.peak)r.peak=pop;
+  }
+}
+function civilWar(r,why){
+  const ss=S.sets.filter(s=>s.realm===r.id);const cap=ss.find(s=>s.id===r.cap)||ss[0];if(!cap)return;
+  const cands=ss.filter(s=>s!==cap);if(cands.length<2)return;
+  const seed=cands.reduce((a,b)=>d2(b.x,b.y,cap.x,cap.y)*Math.sqrt(b.pop)>d2(a.x,a.y,cap.x,cap.y)*Math.sqrt(a.pop)?b:a);
+  const moved=cands.filter(s=>d2(s.x,s.y,seed.x,seed.y)<d2(s.x,s.y,cap.x,cap.y));
+  const nr=makeRealm(r.race,{parent:r.id,faith:r.faith,tech:r.tech,tier:moved.length>=3?1:0,custom:moved.length<3?`Free City of ${seed.name}`:null});
+  for(const s of moved)s.realm=nr.id;nr.cap=seed.id;
+  const all=ss;
+  for(let i=0;i<N;i++){if(S.owner[i]!==r.id)continue;const x=i%W,y=(i/W)|0;let bs=null,bd=1e9;for(const s of all){const d=d2(s.x,s.y,x,y);if(d<bd){bd=d;bs=s}}if(bs)S.owner[i]=bs.realm}
+  const name=why==='succession'?`The War of the ${r.core} Succession`:`The ${seed.name} Rebellion`;
+  log(2,why==='succession'?`A succession crisis tore ${rn(r)} apart. ${sn(seed)} and ${moved.length-1} other holding${moved.length===2?'':'s'} rose as ${rn(nr)}.`
+    :`Revolt! Weary of ${rulerStr(r)}, ${sn(seed)} and ${moved.length-1} other holding${moved.length===2?'':'s'} broke from ${rn(r)} as ${rn(nr)}.`,['r'+r.id,'r'+nr.id,'s'+seed.id],seed.x,seed.y);
+  S.wars.push({id:S.nid++,a:nr.id,b:r.id,start:S.year,name,score:0});
+  r.stab=Math.min(100,r.stab+20);nr.stab=55;
+}
+
+/* ---------- monsters & heroes ---------- */
+function spawnBeast(){
+  const roll=rand();let kind,cell=-1,name,ruin=null;
+  if(roll<.25&&S.ruins.length){kind='lich';ruin=pick(S.ruins);cell=ruin.y*W+ruin.x}
+  else{kind=roll<.72?'dragon':'giant';const want=kind==='dragon'?[B.MOUNTAIN,B.PEAK]:[B.HILLS,B.MOUNTAIN];
+    for(let t=0;t<300;t++){const i=(rand()*N)|0;if(want.includes(G.biome[i])){cell=i;break}}}
+  if(cell<0)return;
+  const x=cell%W,y=(cell/W)|0;
+  if(kind==='dragon')name=cap1(pick(['Vor','Ska','Ith','Zar','Mal','Kry','Aur','Thra','Neth','Ghal','Oro','Syx'])+pick(['athax','iss','omir','yrex','ugor','andrax','esh','ion','abrax','emoth']))+' the '+pick(['Ashen','Red','Pale','Devourer','Undying','Gilded','Black','Stormborn','Old','Hungering']);
+  else if(kind==='giant')name=given('orc',false)+' the '+pick(['Stone-Giant','Frost-Giant','Hill-King','Cyclops','Mountain-Shaker']);
+  else name=`Lich ${given('human',chance(.4))} of ${ruin.name}`;
+  const b={id:S.nid++,kind,name,x,y,born:S.year,life:kind==='dragon'?ri(300,800):kind==='giant'?ri(60,180):ri(150,600),power:kind==='dragon'?ri(8,12):kind==='lich'?ri(6,10):ri(4,7),alive:true,kills:0};
+  S.beasts.push(b);if(S.beasts.length>40)S.beasts.splice(0,S.beasts.findIndex(q=>!q.alive)+1||1);
+  const msg=kind==='dragon'?`${bn(b)} awoke in the mountains ${near(x,y)}.`:kind==='giant'?`${bn(b)} came down from the high country ${near(x,y)}.`:`In the ruins of ${ruin.name}, ${bn(b)} rose from the grave.`;
+  log(2,msg,['b'+b.id],x,y);
+}
+function beastStep(){
+  const alive=S.beasts.filter(b=>b.alive);
+  if(alive.length<3&&S.year>30&&chance(.012))spawnBeast();
+  for(const b of alive){
+    if(S.year-b.born>b.life){b.alive=false;log(1,b.kind==='lich'?`The unlife of ${bn(b)} guttered out at last.`:`${bn(b)} was never seen again. Some say it sleeps still.`,['b'+b.id]);continue}
+    if(chance(.3)){
+      const t=S.sets.filter(s=>d2(s.x,s.y,b.x,b.y)<256);if(!t.length)continue;
+      const s=wpick(t,s=>Math.sqrt(s.pop)/(1+Math.sqrt(d2(s.x,s.y,b.x,b.y))));
+      const loss=s.pop*(.05+rand()*.25);b.kills+=loss;
+      if(s.pop<450||chance(.05)){destroySettlement(s,b.kind==='dragon'?`was burned to ash by ${bn(b)}`:b.kind==='lich'?`was emptied by the dead servants of ${bn(b)}`:`was crushed to rubble by ${bn(b)}`,['b'+b.id]);}
+      else{s.pop-=loss;log(1,`${bn(b)} fell upon ${sn(s)}. ${fmtDead(loss)} perished.`,['b'+b.id,'s'+s.id,'r'+s.realm],s.x,s.y)}
+    }
+    if(b.kind!=='lich'&&chance(.03)){for(let t=0;t<60;t++){const x=clamp(b.x+ri(-15,15),0,W-1),y=clamp(b.y+ri(-15,15),0,H-1);const bb=G.biome[y*W+x];if(bb===B.MOUNTAIN||bb===B.PEAK||bb===B.HILLS){b.x=x;b.y=y;break}}}
+  }
+}
+const EPITHET={dragon:'Dragonsbane',lich:'the Lightbringer',giant:'Giantfeller'};
+function heroStep(){
+  const beasts=S.beasts.filter(b=>b.alive),heroes=S.heroes.filter(h=>h.alive);
+  if(heroes.length<6&&S.sets.length&&chance(.012+beasts.length*.025)){
+    const s=beasts.length?wpick(S.sets,s=>1/(1+Math.min(...beasts.map(b=>d2(s.x,s.y,b.x,b.y))))):pick(S.sets);
+    const r=S.realms[s.realm],f=chance(.4);
+    const h={id:S.nid++,name:given(r.race,f),f,race:r.race,realm:r.id,home:s.name,born:S.year-ri(16,24),alive:true,ep:null,deeds:0};
+    S.heroes.push(h);if(S.heroes.length>60)S.heroes.splice(0,S.heroes.findIndex(q=>!q.alive)+1||1);
+    log(1,`${hn(h)} of ${sn(s)} took up ${RACES[r.race].weapon}${beasts.length?', swearing to rid the land of monsters':''}.`,['s'+s.id,'r'+r.id],s.x,s.y);
+  }
+  for(const h of S.heroes){if(!h.alive)continue;
+    const age=(S.year-h.born)/RACES[h.race].life;
+    if(age>55+rand()*25&&chance(.15)){h.alive=false;if(h.ep||h.deeds>2)log(1,`${hn(h)} died, and was mourned across ${S.realms[h.realm].alive?rn(S.realms[h.realm]):'the land'}.`,['r'+h.realm]);continue}
+    const home=S.sets.find(s=>s.name===h.home);const hx=home?home.x:W/2,hy=home?home.y:H/2;
+    const live=S.beasts.filter(b=>b.alive);if(!live.length||!chance(.2))continue;
+    const b=live.reduce((a,c)=>d2(c.x,c.y,hx,hy)<d2(a.x,a.y,hx,hy)?c:a);if(d2(b.x,b.y,hx,hy)>1225)continue;
+    if(chance(clamp(.3+h.deeds*.06-b.power*.012,.08,.7))){
+      b.alive=false;b.slain=S.year;h.ep=h.ep||EPITHET[b.kind];h.deeds+=3;
+      const R=S.realms[h.realm];if(R.alive)R.stab=Math.min(100,R.stab+12);
+      log(2,`${hn(h)} slew ${bn(b)}, ending ${S.year-b.born} years of terror.`,['b'+b.id,'r'+h.realm],b.x,b.y);
+    }else{h.alive=false;log(1,`${hn(h)} rode out to face ${bn(b)} and was never seen again.`,['b'+b.id,'r'+h.realm],b.x,b.y)}
+  }
+}
+
+/* ---------- faiths, plagues, wonders, disasters ---------- */
+function newFaith(origin){
+  const id=S.faiths.length,h=(id*97.3+S.seed%180+40)%360;
+  const f={id,name:pick(F_P).replace('{x}',pick(F_A)+' '+pick(F_B)),founded:S.year,origin,css:`hsl(${h.toFixed(1)} 55% 55%)`,rgb:hsl2rgb(h,.55,.55),ext:null};
+  S.faiths.push(f);return f;
+}
+function events(){
+  const alive=S.realms.filter(r=>r.alive);
+  if(S.sets.length>10&&chance(.01)){
+    const o=wpick(S.sets,s=>s.pop),nm=`the ${pick(PL_A)} ${pick(PL_B)}`;let dead=0;
+    for(const s of S.sets)if(d2(s.x,s.y,o.x,o.y)<400){const m=.55+rand()*.35;dead+=s.pop*(1-m);s.pop*=m}
+    log(dead>15000?2:1,`${cap1(nm.slice(0,1))+nm.slice(1)} broke out in ${sn(o)} and spread through the surrounding lands. ${fmtDead(dead)} perished.`,['s'+o.id,'r'+o.realm],o.x,o.y);
+  }
+  if(alive.length&&chance(.01)){const r=pick(alive);const ss=setsOf(r.id);if(ss.length>=2){for(const s of ss)s.pop*=.9;r.stab-=10;log(1,`Failed harvests brought famine to ${rn(r)}.`,['r'+r.id])}}
+  for(const s of S.sets){if(s.pop>11000&&s.w.length<2){const r=S.realms[s.realm];if(chance(.003*(1+r.tech*.3))){
+    const n=`the ${pick(WON_A)} ${pick(WON_B)}`;s.w.push({n,y:S.year});log(2,`Builders of ${rn(r)} completed ${n} in ${sn(s)}.`,['r'+r.id,'s'+s.id],s.x,s.y)}}}
+  const living=new Set(alive.map(r=>r.faith));
+  if(S.sets.length&&chance(.005+(living.size<3?.012:0))){
+    const s=pick(S.sets),r=S.realms[s.realm],f=newFaith(s.name);
+    if(chance(.55)||hasT(r,'Pious')){r.faith=f.id;log(2,`A prophet in ${sn(s)} proclaimed the ${f.name}. ${rn(r)} embraced the new faith.`,['s'+s.id,'r'+r.id],s.x,s.y)}
+    else{r.stab-=8;log(2,`A prophet in ${sn(s)} proclaimed the ${f.name}, and was cast out by ${rulerStr(r)}. The faith spread in secret.`,['s'+s.id,'r'+r.id],s.x,s.y);f.hidden=r.id}
+  }
+  for(const f of S.faiths){if(f.hidden!=null&&f.ext==null&&chance(.03)){const r=S.realms[f.hidden];if(r.alive){r.faith=f.id;f.hidden=null;log(2,`The hidden ${f.name} won over ${rn(r)} at last.`,['r'+r.id])}}}
+  if(chance(.6)){for(const[k]of X.border){const a=S.realms[Math.floor(k/4096)],b=S.realms[k%4096];if(!a.alive||!b.alive||a.faith===b.faith)continue;
+    const p=.006+(hasT(a,'Pious')||hasT(b,'Pious')?.02:0);if(!chance(p))continue;
+    const big=(X.cells[a.id]||0)>=(X.cells[b.id]||0)?a:b,small=big===a?b:a;if((S.rel[rkey(a.id,b.id)]||0)<-20)continue;
+    small.faith=big.faith;log(1,`${rn(small)} converted to the ${S.faiths[big.faith].name}, preached by missionaries from ${rn(big)}.`,['r'+small.id,'r'+big.id]);break}}
+  if(S.year%10===0){for(const f of S.faiths){if(f.ext!=null||f.hidden!=null)continue;if(S.year-f.founded<5)continue;if(!alive.some(r=>r.faith===f.id)){f.ext=S.year;log(1,`The last followers of the ${f.name} passed from the world.`,[])}}}
+  if(S.sets.length&&chance(.007)){
+    const c=S.sets.filter(s=>G.nearMtn[s.cell]||G.river[s.cell]);if(c.length){const s=pick(c);const mtn=G.nearMtn[s.cell];
+      if(mtn&&s.pop<1500&&chance(.3))destroySettlement(s,pick(['was buried when the mountain above it erupted','was swallowed by a great earthquake']));
+      else{const m=mtn?.45+rand()*.3:.75+rand()*.15,dead=s.pop*(1-m);s.pop*=m;log(1,mtn?`${pick(['An earthquake','A volcanic eruption'])} struck ${sn(s)}. ${fmtDead(dead)} died.`:`The river rose and flooded ${sn(s)}. ${fmtDead(dead)} drowned.`,['s'+s.id,'r'+s.realm],s.x,s.y)}}
+  }
+  if(chance(.004))log(1,`A comet with a ${pick(['green','crimson','silver','golden','violet'])} tail blazed across the sky for ${ri(9,40)} nights. Seers argued over its meaning.`,[]);
+}
+function spawnPeoples(){
+  const alive=S.realms.filter(r=>r.alive).length;const fr=X.free.length/G.land;
+  if(alive>=30||X.free.length<40||!chance(.02+fr*.12))return;
+  for(let t=0;t<40;t++){
+    const i=X.free[(rand()*X.free.length)|0];const x=i%W,y=(i/W)|0;
+    if(S.owner[i]>=0||tooClose(x,y,8))continue;
+    let ok=true;for(let dy=-4;dy<=4&&ok;dy++)for(let dx=-4;dx<=4;dx++){const xx=x+dx,yy=y+dy;if(xx<0||yy<0||xx>=W||yy>=H)continue;if(S.owner[yy*W+xx]>=0){ok=false;break}}
+    if(!ok)continue;
+    const race=RK.reduce((a,b)=>RACES[b].habit[G.biome[i]]+rand()*.3>RACES[a].habit[G.biome[i]]+rand()*.3?b:a);
+    const where=near(x,y);const r=makeRealm(race);const s=addSettlement(r,i,ri(250,600));r.cap=s.id;
+    log(1,`A people of ${RACES[race].pl} raised their first hearths ${where} and named themselves ${rn(r)}.`,['r'+r.id,'s'+s.id],x,y);
+    return;
+  }
+}
+function newEra(name,heg){S.eras.push({name,start:S.year,heg:heg??null});if(S.year>0)log(3,name,[])}
+function eraCheck(){
+  const cur=S.eras[S.eras.length-1],age=S.year-cur.start;
+  let big=null,bc=0;for(const r of S.realms)if(r.alive&&(X.cells[r.id]||0)>bc){bc=X.cells[r.id];big=r}
+  if(big&&bc>G.land*.3&&cur.heg!==big.id&&age>40){newEra(`The Age of the ${big.core} ${pick(['Ascendancy','Hegemony','Dominion','Peace'])}`,big.id);return}
+  if(age>140&&chance(.012)){
+    const beasts=S.beasts.filter(b=>b.alive).length,wars=S.wars.length;
+    const used=new Set(S.eras.map(e=>e.name));
+    const opts=wars>=4?['Strife','Banners','Blood','Iron']:beasts>=2?['Dragons','Shadow','Fear']:S.faiths.filter(f=>f.ext==null).length>=5?['Prophets','Many Gods','Candles']:['Lanterns','Stars','Silence','Gold','Storms','Thorns','Embers','Rivers','Mist','Bells','Masks','Wonders'];
+    let n=null;for(const o of shuffle(opts.slice())){const c=`The Age of ${o}`;if(!used.has(c)){n=c;break}}
+    if(!n)n=`The ${ORD[Math.min(10,S.eras.length)]||'Later'} Age of ${pick(opts)}`;
+    newEra(n);
+  }
+}
+function recordHist(){
+  const p={};for(const r of S.realms)if(r.alive&&X.pop[r.id])p[r.id]=Math.round(X.pop[r.id]);
+  S.hist.push({y:S.year,p});
+  if(S.hist.length>360)S.hist=S.hist.filter((_,i,a)=>i%2===0||i===a.length-1);
+}
+
+/* ---------- world creation & persistence ---------- */
+function newWorld(seed){
+  G=genTerrain(seed);
+  S={v:1,seed,rng:(seed^0x5bd1e995)>>>0,year:0,name:'',owner:new Int16Array(N).fill(-1),realms:[],sets:[],ruins:[],beasts:[],heroes:[],faiths:[],
+    wars:[],allies:{},truce:{},rel:{},log:[],legends:[],hist:[],eras:[],nid:1,wn:{},raceFaith:{},saved:Date.now()};
+  S.name=worldName();X.names=new Set();
+  for(const r of RK)S.raceFaith[r]=newFaith(null).id;
+  newEra('The Age of '+pick(['Dawn','First Fires','Wandering','Awakening']));
+  agg();computeBorders();
+  let made=0;
+  for(let k=0;k<8;k++){
+    const race=RK[k%5];let best=-1,bs=0;
+    for(let t=0;t<500;t++){const i=(rand()*N)|0;if(!isLand(G.biome[i]))continue;const x=i%W,y=(i/W)|0;if(tooClose(x,y,17))continue;
+      const sc=RACES[race].habit[G.biome[i]]*G.fert[i]+rand()*.2;if(sc>bs){bs=sc;best=i}}
+    if(best<0)continue;const r=makeRealm(race);const s=addSettlement(r,best,ri(300,700));r.cap=s.id;made++;
+  }
+  log(2,`The world of ${S.name} was young. ${made} peoples lit their first fires: ${S.realms.map(rn).join(', ')}.`,S.realms.map(r=>'r'+r.id));
+  agg();computeBorders();recordHist();
+}
+function serialize(){return JSON.stringify(Object.assign({},S,{owner:Array.from(S.owner)}))}
+function restore(text){
+  const o=JSON.parse(text);if(!o||o.v!==1||!Array.isArray(o.owner))return false;
+  o.owner=Int16Array.from(o.owner);S=o;G=genTerrain(S.seed);
+  X.names=new Set([...S.sets.map(s=>s.name),...S.ruins.map(r=>r.name)]);
+  agg();computeBorders();return true;
+}
+function save(){try{S.saved=Date.now();localStorage.setItem(SAVE_KEY,serialize())}catch(e){}}
+function loadSaved(){try{const t=localStorage.getItem(SAVE_KEY);return t?restore(t):false}catch(e){return false}}
+
+/* =====================================================================
+   RENDERING
+   ===================================================================== */
+const cv=$('#map'),ctx=cv.getContext('2d');
+const polCv=document.createElement('canvas');polCv.width=W;polCv.height=H;const pctx=polCv.getContext('2d');
+let view={z:1,ox:0,oy:0},base=1,cw=0,ch=0,dpr=1,mode='realms',sel=null,hover=null,dirtyPol=true;
+let paths={soft:new Path2D(),hard:new Path2D(),war:new Path2D(),sel:new Path2D()};
+function resize(){
+  const r=cv.parentElement.getBoundingClientRect();cw=r.width;ch=r.height;dpr=Math.min(2,window.devicePixelRatio||1);
+  cv.width=Math.max(1,Math.round(cw*dpr));cv.height=Math.max(1,Math.round(ch*dpr));base=Math.min(cw/W,ch/H);clampView();
+  sizeChart();
+}
+function clampView(){
+  const mw=W*base*view.z,mh=H*base*view.z;
+  view.ox=mw<=cw?(cw-mw)/2:clamp(view.ox,cw-mw,0);
+  view.oy=mh<=ch?(ch-mh)/2:clamp(view.oy,ch-mh,0);
+}
+function zoomAt(f,sx,sy){const z=clamp(view.z*f,1,8),k=z/view.z;view.ox=sx-(sx-view.ox)*k;view.oy=sy-(sy-view.oy)*k;view.z=z;clampView()}
+function rebuildPol(){
+  dirtyPol=false;
+  const img=pctx.createImageData(W,H),d=img.data,o=S.owner;
+  if(mode!=='terrain')for(let i=0;i<N;i++){const a=o[i];if(a<0)continue;const r=S.realms[a];const c=mode==='faith'?(S.faiths[r.faith]||S.faiths[0]).rgb:r.rgb;
+    d[i*4]=c[0];d[i*4+1]=c[1];d[i*4+2]=c[2];d[i*4+3]=sel&&sel.t==='r'&&sel.id!==a?120:255}
+  pctx.putImageData(img,0,0);
+  const soft=new Path2D(),hard=new Path2D(),war=new Path2D(),sp=new Path2D();
+  const warSet=new Set(S.wars.map(w=>bkey(w.a,w.b)));const sr=sel&&sel.t==='r'?sel.id:-2;
+  const seg=(a,b,x0,y0,x1,y1,la,lb)=>{
+    if(a===b)return;
+    if(sr>=0&&(a===sr||b===sr)){sp.moveTo(x0,y0);sp.lineTo(x1,y1)}
+    if(!la||!lb)return;
+    let p;if(a>=0&&b>=0)p=warSet.has(bkey(a,b))?war:hard;else p=soft;
+    p.moveTo(x0,y0);p.lineTo(x1,y1);
+  };
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++){const i=y*W+x,a=o[i],la=isLand(G.biome[i]);
+    if(x<W-1)seg(a,o[i+1],x+1,y,x+1,y+1,la,isLand(G.biome[i+1]));
+    if(y<H-1)seg(a,o[i+W],x,y+1,x+1,y+1,la,isLand(G.biome[i+W]));
+  }
+  paths={soft,hard,war,sel:sp};
+}
+function drawBeast(b,px,py,s){
+  ctx.save();ctx.translate(px,py);const k=clamp(.8+s/14,.9,1.6);ctx.scale(k,k);
+  ctx.fillStyle=b.kind==='dragon'?'#c8432b':b.kind==='lich'?'#7fbf9b':'#a58a5c';ctx.strokeStyle='#120c08';ctx.lineWidth=1.4;
+  ctx.beginPath();
+  if(b.kind==='dragon'){ctx.moveTo(0,-7);ctx.lineTo(9,-2);ctx.lineTo(3,0);ctx.lineTo(5,7);ctx.lineTo(0,3);ctx.lineTo(-5,7);ctx.lineTo(-3,0);ctx.lineTo(-9,-2);ctx.closePath()}
+  else if(b.kind==='lich'){ctx.arc(0,-1,5.5,0,Math.PI*2);ctx.moveTo(-3.5,4);ctx.lineTo(-3,8);ctx.lineTo(3,8);ctx.lineTo(3.5,4)}
+  else{ctx.moveTo(-6,7);ctx.lineTo(-4,-4);ctx.lineTo(0,-7);ctx.lineTo(4,-4);ctx.lineTo(6,7);ctx.closePath()}
+  ctx.fill();ctx.stroke();
+  if(b.kind==='lich'){ctx.fillStyle='#120c08';ctx.fillRect(-2.6,-2.5,1.8,1.8);ctx.fillRect(.8,-2.5,1.8,1.8)}
+  ctx.restore();
+}
+function draw(now){
+  ctx.setTransform(dpr,0,0,dpr,0,0);ctx.fillStyle='#17304a';ctx.fillRect(0,0,cw,ch);
+  if(!G)return;
+  const s=base*view.z;
+  ctx.setTransform(dpr*s,0,0,dpr*s,dpr*view.ox,dpr*view.oy);
+  ctx.imageSmoothingEnabled=true;ctx.drawImage(G.canvas,0,0,W,H);
+  if(mode!=='terrain'){ctx.globalAlpha=.44;ctx.drawImage(polCv,0,0,W,H);ctx.globalAlpha=1;
+    ctx.lineCap='round';
+    ctx.strokeStyle='rgba(28,22,16,.35)';ctx.lineWidth=1/s;ctx.stroke(paths.soft);
+    ctx.strokeStyle='rgba(24,18,12,.72)';ctx.lineWidth=1.5/s;ctx.stroke(paths.hard);
+    ctx.strokeStyle='rgba(214,70,48,.95)';ctx.lineWidth=2.2/s;ctx.setLineDash([4/s,3/s]);ctx.stroke(paths.war);ctx.setLineDash([]);
+  }
+  ctx.strokeStyle='#f1c766';ctx.lineWidth=2.6/s;ctx.stroke(paths.sel);
+  // ruins
+  ctx.strokeStyle='rgba(40,28,20,.75)';ctx.lineWidth=1.2/s;
+  for(const r of S.ruins){const x=r.x+.5,y=r.y+.5,q=.32;ctx.beginPath();ctx.moveTo(x-q,y-q);ctx.lineTo(x+q,y+q);ctx.moveTo(x+q,y-q);ctx.lineTo(x-q,y+q);ctx.stroke()}
+  if(hover&&hover.cell!=null){ctx.strokeStyle='rgba(244,236,216,.8)';ctx.lineWidth=1.2/s;ctx.strokeRect(hover.cell%W,(hover.cell/W)|0,1,1)}
+  // screen-space overlays
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  const sx=x=>view.ox+(x+.5)*s,sy=y=>view.oy+(y+.5)*s;
+  const boxes=[];
+  const fits=(x,y,w,h)=>{for(const b of boxes)if(x<b[0]+b[2]&&x+w>b[0]&&y<b[1]+b[3]&&y+h>b[1])return false;boxes.push([x,y,w,h]);return true};
+  // realm names
+  if(mode!=='terrain'){
+    ctx.textAlign='center';ctx.textBaseline='middle';
+    const rs=S.realms.filter(r=>r.alive&&(X.cells[r.id]||0)>=30).sort((a,b)=>X.cells[b.id]-X.cells[a.id]);
+    for(const r of rs){const c=X.cells[r.id],x=sx(X.sx[r.id]/c),y=sy(X.sy[r.id]/c);
+      const fs=clamp(Math.sqrt(c)*.7*Math.sqrt(view.z),10.5,26);ctx.font=`${fs}px 'IM Fell English SC', Georgia, serif`;
+      const label=r.name.toUpperCase();const sp=fs*.12;const w=ctx.measureText(label).width+sp*label.length;
+      if(!fits(x-w/2-12,y-fs/2-5,w+24,fs+10))continue;
+      ctx.letterSpacing=sp+'px';ctx.lineWidth=3;ctx.strokeStyle='rgba(20,16,10,.45)';ctx.strokeText(label,x,y);
+      ctx.fillStyle='rgba(248,240,220,.74)';ctx.fillText(label,x,y);ctx.letterSpacing='0px';
+    }
+  }
+  // settlements
+  const order=S.sets.slice().sort((a,b)=>a.pop-b.pop),zk=Math.min(1.7,Math.sqrt(view.z));
+  for(const t of order){const r=S.realms[t.realm],x=sx(t.x),y=sy(t.y),rad=clamp(1.4+Math.sqrt(t.pop)/30,1.8,6.5)*zk;
+    if(x<-10||y<-10||x>cw+10||y>ch+10)continue;
+    const isCap=r.cap===t.id;
+    ctx.beginPath();
+    if(isCap){ctx.rect(x-rad,y-rad,rad*2,rad*2)}else ctx.arc(x,y,rad,0,Math.PI*2);
+    ctx.fillStyle=mode==='terrain'?'#efe6cf':r.color;ctx.fill();ctx.lineWidth=isCap?2:1.2;ctx.strokeStyle=isCap?'#1a130a':'rgba(18,13,8,.85)';ctx.stroke();
+    if(isCap){ctx.strokeStyle='#f1c766';ctx.lineWidth=1;ctx.strokeRect(x-rad-2.5,y-rad-2.5,rad*2+5,rad*2+5)}
+    if(t.w.length){ctx.fillStyle='#f1c766';ctx.beginPath();ctx.arc(x+rad+2,y-rad-2,2.2,0,Math.PI*2);ctx.fill()}
+    if(sel&&sel.t==='s'&&sel.id===t.id){ctx.strokeStyle='#f1c766';ctx.lineWidth=2;ctx.beginPath();ctx.arc(x,y,rad+6,0,Math.PI*2);ctx.stroke()}
+  }
+  // settlement labels
+  ctx.textAlign='left';ctx.textBaseline='middle';
+  const minPop=view.z>=3?600:view.z>=1.8?3000:12000;
+  const lab=S.sets.filter(t=>t.pop>=minPop||(S.realms[t.realm].cap===t.id&&(view.z>=1.6||(X.cells[t.realm]||0)>=50))||(sel&&sel.t==='s'&&sel.id===t.id)).sort((a,b)=>b.pop-a.pop);
+  for(const t of lab){const x=sx(t.x),y=sy(t.y),big=t.pop>15000||S.realms[t.realm].cap===t.id;const fs=big?13:11.5;
+    ctx.font=`${big?500:400} ${fs}px 'Alegreya Sans', 'Trebuchet MS', sans-serif`;const w=ctx.measureText(t.name).width,rad=clamp(1.4+Math.sqrt(t.pop)/30,1.8,6.5)*zk;
+    const lx=x+rad+4;if(!fits(lx,y-fs/2,w,fs))continue;
+    ctx.lineWidth=3;ctx.strokeStyle='rgba(16,12,8,.75)';ctx.strokeText(t.name,lx,y);ctx.fillStyle='#f6eedb';ctx.fillText(t.name,lx,y);
+  }
+  // beasts
+  for(const b of S.beasts){if(!b.alive)continue;const x=sx(b.x),y=sy(b.y);drawBeast(b,x,y,s);
+    ctx.font=`italic 12px 'IM Fell English', Georgia, serif`;const nm=b.name.split(' the ')[0].split(' of ')[0];const w=ctx.measureText(nm).width;
+    if(fits(x-w/2,y+9,w,13)){ctx.textAlign='center';ctx.lineWidth=3;ctx.strokeStyle='rgba(16,12,8,.8)';ctx.strokeText(nm,x,y+16);ctx.fillStyle='#ffb49a';ctx.fillText(nm,x,y+16);ctx.textAlign='left'}
+  }
+  // pings
+  for(let i=fx.length-1;i>=0;i--){const f=fx[i],a=Math.max(0,(now-f.t)/1600);if(a>=1){fx.splice(i,1);continue}
+    ctx.beginPath();ctx.arc(sx(f.x),sy(f.y),4+a*26,0,Math.PI*2);ctx.strokeStyle=f.c;ctx.globalAlpha=1-a;ctx.lineWidth=2;ctx.stroke();ctx.globalAlpha=1}
+}
+
+/* ---------- chart ---------- */
+const chartCv=$('#chart'),cctx=chartCv.getContext('2d');let chartW=0,chartH=0,chartDirty=true;
+function sizeChart(){const r=chartCv.getBoundingClientRect();chartW=r.width;chartH=r.height;chartCv.width=Math.max(1,Math.round(chartW*dpr));chartCv.height=Math.max(1,Math.round(chartH*dpr));chartDirty=true}
+const CH_PAD={l:46,r:10,t:24,b:20};
+function drawChart(){
+  chartDirty=false;const c=cctx;c.setTransform(dpr,0,0,dpr,0,0);c.clearRect(0,0,chartW,chartH);
+  const hs=S.hist;if(hs.length<2)return;
+  const y0=hs[0].y,y1=hs[hs.length-1].y,pw=chartW-CH_PAD.l-CH_PAD.r,ph=chartH-CH_PAD.t-CH_PAD.b;
+  let mx=1;for(const h of hs){let t=0;for(const k in h.p)t+=h.p[k];if(t>mx)mx=t}
+  const X_=y=>CH_PAD.l+(y-y0)/Math.max(1,y1-y0)*pw,Y_=v=>CH_PAD.t+ph-v/mx*ph;
+  c.strokeStyle='rgba(147,161,155,.18)';c.lineWidth=1;c.font="11px 'IBM Plex Mono', monospace";c.fillStyle='#93a19b';c.textBaseline='middle';c.textAlign='right';
+  for(const f of[0,.5,1]){const yy=Math.round(Y_(mx*f))+.5;c.beginPath();c.moveTo(CH_PAD.l,yy);c.lineTo(chartW-CH_PAD.r,yy);c.stroke();c.fillText(fmt(mx*f),CH_PAD.l-6,yy)}
+  const ids=new Set();for(const h of hs)for(const k in h.p)ids.add(+k);const order=[...ids].sort((a,b)=>a-b);
+  const cum=new Float64Array(hs.length);
+  for(const id of order){const r=S.realms[id];if(!r)continue;c.beginPath();
+    for(let i=0;i<hs.length;i++){const v=cum[i]+(hs[i].p[id]||0);const x=X_(hs[i].y),y=Y_(v);i?c.lineTo(x,y):c.moveTo(x,y)}
+    for(let i=hs.length-1;i>=0;i--)c.lineTo(X_(hs[i].y),Y_(cum[i]));
+    c.closePath();c.fillStyle=r.color;c.globalAlpha=.88;c.fill();c.globalAlpha=1;
+    for(let i=0;i<hs.length;i++)cum[i]+=hs[i].p[id]||0;
+  }
+  c.strokeStyle='rgba(211,170,94,.55)';c.setLineDash([3,3]);c.textAlign='left';c.fillStyle='#d3aa5e';c.font="italic 11px 'IM Fell English', Georgia, serif";
+  for(const e of S.eras){if(e.start<=y0||e.start>y1)continue;const x=Math.round(X_(e.start))+.5;c.beginPath();c.moveTo(x,CH_PAD.t);c.lineTo(x,CH_PAD.t+ph);c.stroke()}
+  c.setLineDash([]);
+  c.fillStyle='#93a19b';c.font="11px 'IBM Plex Mono', monospace";c.textBaseline='alphabetic';
+  c.textAlign='left';c.fillText('Y'+y0,CH_PAD.l,chartH-5);c.textAlign='right';c.fillText('Y'+y1,chartW-CH_PAD.r,chartH-5);
+}
+chartCv.addEventListener('mousemove',e=>{
+  const hs=S&&S.hist;const tip=$('#chartTip');if(!hs||hs.length<2){tip.hidden=true;return}
+  const r=chartCv.getBoundingClientRect(),mx=e.clientX-r.left;const y0=hs[0].y,y1=hs[hs.length-1].y,pw=chartW-CH_PAD.l-CH_PAD.r;
+  const yr=y0+(mx-CH_PAD.l)/pw*(y1-y0);let best=hs[0];for(const h of hs)if(Math.abs(h.y-yr)<Math.abs(best.y-yr))best=h;
+  const top=Object.entries(best.p).sort((a,b)=>b[1]-a[1]).slice(0,3);let tot=0;for(const k in best.p)tot+=best.p[k];
+  tip.innerHTML=`<b>Year ${best.y}</b> · ${fmt(tot)} souls<br>`+top.map(([id,v])=>`<span class="ref r" style="--c:${S.realms[id].color};border:0">${S.realms[id].name}</span> ${fmt(v)}`).join('<br>');
+  tip.hidden=false;tip.style.left=clamp(mx+12,0,chartW-tip.offsetWidth-4)+'px';
+});
+chartCv.addEventListener('mouseleave',()=>{$('#chartTip').hidden=true});
+
+/* =====================================================================
+   UI
+   ===================================================================== */
+let playing=true,speed=3,acc=0,last=performance.now(),uiDirty=true,lastUi=0,logFilter=1,tab='chronicle';
+const logEl=$('#log'),legEl=$('#legends');
+function liFor(e,isFresh){const li=document.createElement('li');li.className='i'+e.i+(isFresh?' fresh':'');li.innerHTML=`<span class="y">${e.i===3?'Year '+e.y:e.y}</span><span class="t">${e.t}</span>`;return li}
+function rebuildLog(){logEl.textContent='';const items=S.log.filter(e=>e.i>=logFilter).slice(-260).reverse();const f=document.createDocumentFragment();for(const e of items)f.appendChild(liFor(e,false));logEl.appendChild(f)}
+function rebuildLegends(){legEl.textContent='';const f=document.createDocumentFragment();for(const e of S.legends.slice().reverse())f.appendChild(liFor(e,false));legEl.appendChild(f)}
+function flushLog(){
+  if(!fresh.length)return;
+  const items=fresh.filter(e=>e.i>=logFilter);const many=items.length>30;
+  const f=document.createDocumentFragment();for(const e of items.slice(-60).reverse())f.appendChild(liFor(e,!many));
+  logEl.insertBefore(f,logEl.firstChild);while(logEl.children.length>260)logEl.lastChild.remove();
+  const leg=fresh.filter(e=>e.i>=2);if(leg.length){const g=document.createDocumentFragment();for(const e of leg.slice().reverse())g.appendChild(liFor(e,true));legEl.insertBefore(g,legEl.firstChild);while(legEl.children.length>320)legEl.lastChild.remove()}
+  fresh=[];
+}
+function renderHeader(){
+  $('#worldName').textContent=S.name;$('#eraName').textContent=S.eras[S.eras.length-1].name;$('#year').textContent=S.year;
+  const alive=S.realms.filter(r=>r.alive);let pop=0;for(const s of S.sets)pop+=s.pop;
+  const beasts=S.beasts.filter(b=>b.alive).length;
+  const warNames=new Set(S.wars.map(w=>w.name));
+  $('#stats').innerHTML=`<span><b>${fmt(pop)}</b> souls</span><span><b>${alive.length}</b> realms</span><span><b>${S.sets.length}</b> settlements</span><span><b>${warNames.size}</b> war${warNames.size===1?'':'s'}</span><span><b>${S.faiths.filter(f=>f.ext==null).length}</b> faiths</span><span><b>${beasts}</b> monster${beasts===1?'':'s'} abroad</span><span><b>${S.ruins.length}</b> ruins</span>`;
+  document.title=`${S.name} · Year ${S.year}`;
+}
+function realmRow(r){
+  const ss=setsOf(r.id),war=X.atWar.has(r.id)&&r.alive;
+  const sub=r.alive?`${RACES[r.race].n} · ${rulerStr(r)}`:`${RACES[r.race].n} · ${r.founded}–${r.fell}`;
+  return`<div class="realm-row" data-ref="r${r.id}" role="button" tabindex="0"><span class="sw" style="--c:${r.color}"></span><div style="min-width:0"><div class="nm">${r.name}${war?'<span class="chip war">war</span>':''}${r.golden>S.year?'<span class="chip gold">golden age</span>':''}</div><div class="sub">${sub}</div></div><div class="num">${r.alive?fmt(X.pop[r.id]||0):'fallen'}<small>${r.alive?ss.length+' holdings':'peak '+fmt(r.peak)}</small></div></div>`;
+}
+function renderRealms(){
+  const alive=S.realms.filter(r=>r.alive).sort((a,b)=>(X.pop[b.id]||0)-(X.pop[a.id]||0));
+  const dead=S.realms.filter(r=>!r.alive).sort((a,b)=>b.fell-a.fell).slice(0,30);
+  $('#pane-realms').innerHTML=alive.map(realmRow).join('')+(dead.length?`<details class="fallen" id="fallenBox"${fallenOpen?' open':''}><summary>Fallen realms (${S.realms.length-alive.length})</summary>${dead.map(realmRow).join('')}</details>`:'');
+  const fb=$('#fallenBox');if(fb)fb.addEventListener('toggle',()=>{fallenOpen=fb.open});
+}
+let fallenOpen=false;
+function historyFor(ref){const items=S.log.filter(e=>e.r.includes(ref)).slice(-40).reverse();return items.length?`<ul class="log">${items.map(e=>`<li class="i${e.i}"><span class="y">${e.y}</span><span class="t">${e.t}</span></li>`).join('')}</ul>`:'<div class="empty">Nothing recorded yet.</div>'}
+function kv(k,v,meter){return`<div><div class="k">${k}</div><div class="v">${v}</div>${meter!=null?`<div class="meter"><i style="width:${clamp(meter,0,100)}%"></i></div>`:''}</div>`}
+function renderInspect(){
+  const el=$('#pane-inspect');
+  if(!sel){el.innerHTML='<div class="empty">Click a realm, a settlement, a ruin or a monster on the map, or any name in the chronicle, to see its story here.</div>';return}
+  const closeBtn='<button class="btn close" type="button" id="clearSel">Close</button>';
+  if(sel.t==='r'){
+    const r=S.realms[sel.id];if(!r){sel=null;return renderInspect()}
+    const ss=S.sets.filter(s=>s.realm===r.id).sort((a,b)=>b.pop-a.pop),cap=ss.find(s=>s.id===r.cap);
+    const cells=X.cells[r.id]||0,faith=S.faiths[r.faith];
+    const wars=S.wars.filter(w=>w.a===r.id||w.b===r.id).map(w=>{const o=S.realms[w.a===r.id?w.b:w.a];return`<li><span>${rnB(o)}</span><span>since ${w.start}</span></li>`}).join('');
+    const allies=Object.keys(S.allies).map(k=>k.split('-').map(Number)).filter(([a,b])=>a===r.id||b===r.id).map(([a,b])=>S.realms[a===r.id?b:a]);
+    const neigh=[];for(const[k,bc]of X.border){const a=Math.floor(k/4096),b=k%4096;if(a!==r.id&&b!==r.id)continue;const o=a===r.id?b:a;neigh.push([S.realms[o],S.rel[rkey(a,b)]||0])}
+    neigh.sort((a,b)=>a[1]-b[1]);
+    const relBar=v=>{const w=Math.abs(v)/2;return`<span class="rel"><i style="${v<0?`right:50%;width:${w}%;background:var(--blood)`:`left:50%;width:${w}%;background:var(--brass)`}"></i></span>`};
+    const ru=r.ruler,age=S.year-ru.born;
+    el.innerHTML=`${closeBtn}<h2><span class="sw" style="--c:${r.color}"></span>${r.name}</h2>
+      <div class="kicker">${RACES[r.race].n} realm · founded in year ${r.founded}${r.parent!=null?` · broke from ${rnB(S.realms[r.parent])}`:''}${r.alive?'':` · <span style="color:var(--blood)">fell in year ${r.fell}</span>`}</div>
+      ${r.alive?`<div class="ruler"><div class="nm">${rulerStr(r)}</div><div>House ${ru.dyn} · age ${age} · reigning since ${ru.crowned}</div><div>${ru.traits.map(t=>`<span class="trait">${t}</span>`).join('')}</div></div>
+      <h4>The realm</h4><div class="kv">${kv('Population',fmt(X.pop[r.id]||0))}${kv('Holdings',ss.length)}${kv('Territory',(cells/G.land*100).toFixed(1)+'% of land')}${kv('Seat',cap?sn(cap):'none')}${kv('Stability',Math.round(r.stab),r.stab)}${kv('Learning',`Age of ${TECH_AGE[r.tech]}`)}${kv('Faith',`<span style="font-family:var(--f-body)">${faith?faith.name:'none'}</span>`)}${kv('Military',fmt(power(r)*10))}</div>
+      <h4>Diplomacy</h4><ul class="mini">${wars||''}${allies.map(a=>`<li><span>${rnB(a)}</span><span>ally</span></li>`).join('')}${neigh.filter(([o])=>!findWar(o.id,r.id)&&!S.allies[rkey(o.id,r.id)]).map(([o,v])=>`<li><span>${rnB(o)}</span><span>${v>30?'friendly':v<-30?'hostile':'wary'}${relBar(v)}</span></li>`).join('')}</ul>${!wars&&!allies.length&&!neigh.length?'<div class="empty">No neighbours yet.</div>':''}
+      <h4>Holdings</h4><ul class="mini">${ss.slice(0,14).map(s=>`<li><span>${sn(s)}${s.id===r.cap?' <span class="chip gold">seat</span>':''}</span><span>${kind(s.pop)} · ${fmt(s.pop)}</span></li>`).join('')}</ul>`
+      :`<div class="kv">${kv('Peak population',fmt(r.peak))}${kv('Lasted',(r.fell-r.founded)+' years')}</div>`}
+      <h4>Chronicle</h4>${historyFor('r'+r.id)}`;
+  }else if(sel.t==='s'){
+    const s=S.sets.find(q=>q.id===sel.id);
+    if(!s){const ru=S.ruins.find(q=>q.sid===sel.id);el.innerHTML=`${closeBtn}<h2>${ru?'Ruins of '+ru.name:'A lost place'}</h2><div class="kicker">${ru?`Founded in year ${ru.founded}, destroyed in year ${ru.year}.${ru.w.length?' Once home to '+ru.w.join(' and ')+'.':''}`:'Nothing remains of it.'}</div><h4>Chronicle</h4>${historyFor('s'+sel.id)}`;return}
+    const r=S.realms[s.realm];
+    el.innerHTML=`${closeBtn}<h2>${s.name}</h2><div class="kicker">${kind(s.pop)} of ${rnB(r)}${r.cap===s.id?' · seat of the realm':''}</div>
+      <div class="kv">${kv('Population',Math.round(s.pop).toLocaleString('en-US'))}${kv('Founded','year '+s.founded)}${kv('Land',BIOME[G.biome[s.cell]].n+(G.river[s.cell]?', river':'')+(G.coast[s.cell]?', coast':''))}${kv('Folk',RACES[r.race].pl)}</div>
+      ${s.w.length?`<h4>Wonders</h4><ul class="mini">${s.w.map(w=>`<li><span>${cap1(w.n.slice(0,1))+w.n.slice(1)}</span><span>year ${w.y}</span></li>`).join('')}</ul>`:''}
+      <h4>Chronicle</h4>${historyFor('s'+s.id)}`;
+  }else if(sel.t==='b'){
+    const b=S.beasts.find(q=>q.id===sel.id);if(!b){sel=null;return renderInspect()}
+    el.innerHTML=`${closeBtn}<h2>${b.name}</h2><div class="kicker">${b.kind==='dragon'?'Dragon':b.kind==='lich'?'Lich':'Giant'} · first seen in year ${b.born}${b.alive?'':b.slain?` · slain in year ${b.slain}`:' · vanished'}</div>
+      <div class="kv">${kv('Age',(b.alive?S.year:(b.slain||S.year))-b.born+' years')}${kv('Victims',fmtDead(b.kills))}${kv('Might',b.power+' / 12',b.power/12*100)}${kv('Lair',BIOME[G.biome[b.y*W+b.x]].n)}</div>
+      <h4>Chronicle</h4>${historyFor('b'+b.id)}`;
+  }else if(sel.t==='ruin'){
+    const ru=S.ruins.find(q=>q.id===sel.id);if(!ru){sel=null;return renderInspect()}
+    el.innerHTML=`${closeBtn}<h2>Ruins of ${ru.name}</h2><div class="kicker">Founded in year ${ru.founded}, destroyed in year ${ru.year}.</div>${ru.w.length?`<p>Once home to ${ru.w.join(' and ')}.</p>`:''}<h4>Chronicle</h4>${historyFor('s'+ru.sid)}`;
+  }
+  const cb=$('#clearSel');if(cb)cb.onclick=()=>select(null);
+}
+function setTab(t){tab=t;for(const b of document.querySelectorAll('.tabs button'))b.setAttribute('aria-selected',b.dataset.tab===t?'true':'false');
+  for(const p of['chronicle','realms','legends','inspect'])$('#pane-'+p).hidden=p!==t;uiDirty=true;lastUi=0}
+function select(s){sel=s;dirtyPol=true;if(s)setTab('inspect');renderInspect();if(s){$('#pane-inspect').scrollTop=0}}
+function selectRef(ref){
+  if(!ref)return;const t=ref[0],id=+ref.slice(1);
+  if(t==='r')select({t:'r',id});else if(t==='s')select({t:'s',id});else if(t==='b')select({t:'b',id});
+}
+document.addEventListener('click',e=>{const a=e.target.closest('[data-ref]');if(a&&!a.closest('#map')){e.preventDefault();selectRef(a.dataset.ref)}});
+document.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.matches('.realm-row')){e.preventDefault();selectRef(e.target.dataset.ref)}});
+for(const b of document.querySelectorAll('.tabs button'))b.addEventListener('click',()=>setTab(b.dataset.tab));
+$('#logFilter').addEventListener('change',e=>{logFilter=+e.target.value;rebuildLog()});
+$('#playBtn').addEventListener('click',()=>{playing=!playing;$('#playBtn').textContent=playing?'Pause':'Resume';last=performance.now()});
+for(const b of document.querySelectorAll('#speedSeg button'))b.addEventListener('click',()=>{speed=+b.dataset.s;for(const o of document.querySelectorAll('#speedSeg button'))o.setAttribute('aria-pressed',o===b?'true':'false')});
+for(const b of document.querySelectorAll('#modeSeg button'))b.addEventListener('click',()=>{mode=b.dataset.m;dirtyPol=true;for(const o of document.querySelectorAll('#modeSeg button'))o.setAttribute('aria-pressed',o===b?'true':'false')});
+let newArm=0;
+$('#newBtn').addEventListener('click',()=>{
+  const b=$('#newBtn');
+  if(Date.now()-newArm>4000){newArm=Date.now();b.textContent='Replace this world?';b.classList.add('warn');setTimeout(()=>{if(Date.now()-newArm>=3900){b.textContent='New world';b.classList.remove('warn')}},4000);return}
+  newArm=0;b.textContent='New world';b.classList.remove('warn');
+  genesis((Math.random()*2**31)|0);
+});
+$('#zin').addEventListener('click',()=>zoomAt(1.4,cw/2,ch/2));
+$('#zout').addEventListener('click',()=>zoomAt(1/1.4,cw/2,ch/2));
+$('#zreset').addEventListener('click',()=>{view.z=1;clampView()});
+
+/* ---------- map pointer handling ---------- */
+const ptrs=new Map();let drag=null,pinch=null;
+function cellAt(mx,my){const s=base*view.z,x=Math.floor((mx-view.ox)/s),y=Math.floor((my-view.oy)/s);if(x<0||y<0||x>=W||y>=H)return null;return{x,y,cell:y*W+x,fx:(mx-view.ox)/s-.5,fy:(my-view.oy)/s-.5}}
+function thingAt(c){
+  if(!c)return null;
+  const s=base*view.z,tol=Math.max(1.2,9/s),t2=tol*tol;
+  let bb=null,bd=t2;for(const b of S.beasts)if(b.alive){const d=d2(b.x,b.y,c.fx,c.fy);if(d<bd){bd=d;bb=b}}if(bb)return{t:'b',id:bb.id,o:bb};
+  let bs=null;bd=t2;for(const t of S.sets){const d=d2(t.x,t.y,c.fx,c.fy);if(d<bd){bd=d;bs=t}}if(bs)return{t:'s',id:bs.id,o:bs};
+  let br=null;bd=Math.min(t2,1);for(const r of S.ruins){const d=d2(r.x,r.y,c.fx,c.fy);if(d<bd){bd=d;br=r}}if(br)return{t:'ruin',id:br.id,o:br};
+  const o=S.owner[c.cell];if(o>=0)return{t:'r',id:o,o:S.realms[o]};
+  return null;
+}
+function showTip(mx,my){
+  const tip=$('#tip'),c=cellAt(mx,my);hover=c;if(!c||!S){tip.hidden=true;return}
+  const th=thingAt(c),b=G.biome[c.cell],o=S.owner[c.cell];let h='';
+  if(th&&th.t==='s'){const r=S.realms[th.o.realm];h=`<b>${th.o.name}</b><br><span class="k">${kind(th.o.pop)} · ${fmt(th.o.pop)} souls</span><br>${r.name}${th.o.w.length?'<br><span class="k">'+th.o.w.map(w=>w.n).join(', ')+'</span>':''}`}
+  else if(th&&th.t==='b')h=`<b style="color:#ffb49a">${th.o.name}</b><br><span class="k">${th.o.kind}, first seen in year ${th.o.born}</span>`;
+  else if(th&&th.t==='ruin')h=`<b>Ruins of ${th.o.name}</b><br><span class="k">destroyed in year ${th.o.year}</span>`;
+  else h=`${o>=0?`<b>${S.realms[o].name}</b><br>`:''}<span class="k">${BIOME[b].n}${G.river[c.cell]?' · river':''}${o<0&&isLand(b)?' · unclaimed':''}</span>`;
+  tip.innerHTML=h;tip.hidden=false;
+  const tw=tip.offsetWidth,tht=tip.offsetHeight;tip.style.left=clamp(mx+14,4,cw-tw-4)+'px';tip.style.top=clamp(my+14,4,ch-tht-4)+'px';
+}
+cv.addEventListener('pointerdown',e=>{cv.setPointerCapture(e.pointerId);ptrs.set(e.pointerId,{x:e.offsetX,y:e.offsetY});
+  if(ptrs.size===1)drag={x:e.offsetX,y:e.offsetY,ox:view.ox,oy:view.oy,moved:false};
+  else if(ptrs.size===2){const[a,b]=[...ptrs.values()];pinch={d:Math.hypot(a.x-b.x,a.y-b.y),z:view.z};drag=null}});
+cv.addEventListener('pointermove',e=>{
+  if(ptrs.has(e.pointerId))ptrs.set(e.pointerId,{x:e.offsetX,y:e.offsetY});
+  if(pinch&&ptrs.size===2){const[a,b]=[...ptrs.values()];const d=Math.hypot(a.x-b.x,a.y-b.y);zoomAt(pinch.z*d/pinch.d/view.z,(a.x+b.x)/2,(a.y+b.y)/2);return}
+  if(drag){const dx=e.offsetX-drag.x,dy=e.offsetY-drag.y;if(Math.abs(dx)+Math.abs(dy)>4){drag.moved=true;cv.classList.add('dragging')}
+    if(drag.moved){view.ox=drag.ox+dx;view.oy=drag.oy+dy;clampView();$('#tip').hidden=true;return}}
+  if(e.pointerType==='mouse')showTip(e.offsetX,e.offsetY);
+});
+function endPtr(e){
+  const wasDrag=drag;ptrs.delete(e.pointerId);if(ptrs.size<2)pinch=null;
+  if(wasDrag&&!wasDrag.moved&&e.type==='pointerup'&&S){const th=thingAt(cellAt(e.offsetX,e.offsetY));select(th?{t:th.t,id:th.id}:null);if(e.pointerType!=='mouse')showTip(e.offsetX,e.offsetY)}
+  drag=null;cv.classList.remove('dragging');
+}
+cv.addEventListener('pointerup',endPtr);cv.addEventListener('pointercancel',endPtr);
+cv.addEventListener('pointerleave',e=>{if(e.pointerType==='mouse'){$('#tip').hidden=true;hover=null}});
+cv.addEventListener('wheel',e=>{e.preventDefault();zoomAt(e.deltaY<0?1.18:1/1.18,e.offsetX,e.offsetY)},{passive:false});
+
+/* ---------- main loop ---------- */
+function afterYears(){renderHeader();flushLog();chartDirty=true;uiDirty=true;if(S.year%20===0)save()}
+function frame(now){
+  const dt=Math.min(.25,(now-last)/1000);last=now;
+  if(S&&playing){acc+=dt*speed;let n=0;while(acc>=1&&n<40){stepYear();acc-=1;n++}if(n)afterYears()}
+  if(S){
+    if(dirtyPol)rebuildPol();
+    if(chartDirty)drawChart();
+    if(uiDirty&&now-lastUi>450){lastUi=now;uiDirty=false;if(tab==='realms')renderRealms();else if(tab==='inspect')renderInspect()}
+  }
+  draw(now);
+  requestAnimationFrame(frame);
+}
+function showBanner(years,events){
+  const el=$('#banner');
+  el.innerHTML=`<h3>${years} years passed while you were away</h3><div>${S.name} kept turning. The greatest events:</div><ul>${events.slice(-6).reverse().map(e=>`<li><b style="font-family:var(--f-mono);font-size:12px;color:var(--brass)">${e.y}</b> ${e.t}</li>`).join('')||'<li>The years were quiet.</li>'}</ul><button class="btn primary" type="button" id="bannerOk">Continue watching</button>`;
+  el.hidden=false;$('#bannerOk').onclick=()=>{el.hidden=true};
+}
+function afterLoad(){
+  sel=null;fx.length=0;fresh=[];dirtyPol=true;chartDirty=true;view.z=1;clampView();
+  renderHeader();rebuildLog();rebuildLegends();renderInspect();if(tab==='realms')renderRealms();
+  $('#loading').hidden=true;
+}
+function genesis(seed){
+  $('#loading').hidden=false;$('#banner').hidden=true;
+  setTimeout(()=>{newWorld(seed);afterLoad();save()},30);
+}
+function start(data){
+  resize();
+  setTimeout(()=>{
+    let ok=false;
+    if(data&&data.save){try{ok=restore(data.save)}catch(e){ok=false}}
+    if(!ok)ok=loadSaved();
+    if(ok){
+      const away=(Date.now()-(S.saved||Date.now()))/60000;const yrs=Math.min(250,Math.floor(away*2));
+      if(yrs>=3&&!(data&&data.save)){const y0=S.year;X.silent=true;for(let i=0;i<yrs;i++)stepYear();X.silent=false;fresh=[];
+        const ev=S.legends.filter(e=>e.y>y0&&e.i===2);afterLoad();showBanner(yrs,ev);save()}
+      else afterLoad();
+    }else{newWorld((Math.random()*2**31)|0);afterLoad();save()}
+    requestAnimationFrame(t=>{last=t;frame(t)});
+  },30);
+}
+new ResizeObserver(()=>{resize()}).observe($('#mapwrap'));
+window.addEventListener('pagehide',()=>{if(S)save()});
+document.addEventListener('visibilitychange',()=>{if(document.hidden&&S)save()});
+window.claude?.hot?.snapshot?.(()=>({save:S?serialize():null}));
+window.__atlas={get S(){return S},stepYear,agg,computeBorders};
+window.claude?.hot?.ready?window.claude.hot.ready(start):start(window.claude?.hot?.data??{});
+</script>
