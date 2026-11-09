@@ -1,23 +1,44 @@
 """Extract the glyphs used by the atlas into src/icons.js.
 
-  UI, map and event symbols: Tabler Icons (MIT), via @iconify-json/tabler.
-  Heraldic charges:          game-icons.net (CC BY 3.0), via @iconify-json/game-icons.
+All symbols and heraldic charges come from game-icons.net (CC BY 3.0), via @iconify-json/game-icons.
 
-Usage: python3 tools/extract_icons.py path/to/tabler/icons.json path/to/game-icons/icons.json
+Usage: python3 tools/extract_icons.py path/to/game-icons/icons.json
 """
 import json, re, sys
 
-TABLER = '''swords sword building-fortress flag-2 flame leaf heart-handshake crown award shield-off shield-x shield-star shield-half
-building-castle link hand-ring-finger baby-carriage grave-2 building-arch home campfire walk sailboat ship route coins hammer
-building-store building-church script git-fork pray sparkles flask book-2 palette compass wand spiral building-monument sun virus
-wheat grain snowflake volcano droplet comet moon confetti trophy dragon paw ripple skull ghost hand-rock mask anchor hourglass
-users users-group user chart-dots mountain world search adjustments-horizontal volume volume-off focus-centered player-play
-player-pause x arrow-left chevron-right chevron-down cloud layout-sidebar-right-collapse layout-sidebar-right-expand plus minus
-map-pin timeline list command trending-up trending-down bolt scale building-bank pick tree trees fish horse diamond grape
-building-lighthouse medal school wall tower tent helmet seedling cloud-rain storm temperature biohazard target crosshair
-calendar history gavel eye info-circle star bell-ringing refresh key lock spy bow axe map-2 stack-2 chart-area-line
-building-community dice-5 military-award arrows-split tournament meat bread wind circle-dot'''.split()
-
+# Every symbol key used by the code, mapped to an engraved game-icons glyph (or a hand-drawn control glyph).
+SYMBOLS = {
+  'swords':'crossed-swords','sword':'broadsword','building-fortress':'siege-tower','flag-2':'flag-objective','flame':'flame','leaf':'falling-leaf',
+  'dove':'peace-dove','heart-handshake':'shaking-hands','crown':'crown','award':'laurel-crown','shield-off':'broken-shield','shield-x':'broken-shield',
+  'shield-star':'visored-helm','shield-half':'checked-shield','building-castle':'castle','link':'linked-rings','hand-ring-finger':'big-diamond-ring',
+  'baby-carriage':'baby-bottle','grave-2':'tombstone','building-arch':'ancient-ruins','home':'village','campfire':'campfire','walk':'walking-boot',
+  'sailboat':'sailboat','ship':'galleon','route':'caravan','coins':'coins','hammer':'claw-hammer','building-store':'shop','building-church':'church',
+  'script':'scroll-unfurled','git-fork':'crossroad','pray':'prayer','sparkles':'sparkles','flask':'fizzing-flask','book-2':'open-book','palette':'palette',
+  'compass':'compass','wand':'wizard-staff','spiral':'magic-swirl','building-monument':'greek-temple','sun':'sun','virus':'plague-doctor-profile',
+  'wheat':'wheat','grain':'grain','snowflake':'snowflake-2','volcano':'volcano','droplet':'water-drop','comet':'comet-spark','moon':'moon',
+  'confetti':'jester-hat','trophy':'trophy','tournament':'trophy-cup','dragon':'dragon-head','paw':'giant','ripple':'sea-serpent','skull':'crowned-skull',
+  'ghost':'ghost','hand-rock':'giant','mask':'hood','spy':'stiletto','anchor':'anchor','hourglass':'hourglass','timeline':'sands-of-time',
+  'users':'family-tree','users-group':'three-friends','user':'person','chart-dots':'village','mountain':'mountains','world':'world',
+  'search':'magnifying-glass','adjustments-horizontal':'settings-knobs','volume':'harp','volume-off':'harp','focus-centered':'spyglass',
+  'cloud':'fluffy-cloud','layout-sidebar-right-collapse':'open-book','layout-sidebar-right-expand':'book-cover','map-pin':'position-marker',
+  'list':'quill-ink','scale':'scales','building-bank':'locked-chest','pick':'mining','tree':'oak','trees':'pine-tree','fish':'fishing',
+  'horse':'horse-head','diamond':'cut-diamond','grape':'grapes','building-lighthouse':'lighthouse','medal':'medal','military-award':'medal',
+  'school':'bookshelf','wall':'stone-wall','tower':'stone-tower','tent':'camping-tent','helmet':'barbute','seedling':'sprout','storm':'tornado',
+  'gavel':'scales','star':'star-formation','chart-area-line':'histogram','building-community':'tower-flag','crosshair':'eye-target','refresh':'cycle',
+  'trophy-almanac':'trophy','astrolabe':'sundial','telescope':'telescope','map':'treasure-map','crystal':'crystal-ball','star-shield':'checked-shield',
+}
+# Plain geometric controls, drawn on the same 512 grid as the engraved glyphs.
+HANDMADE = {
+  'player-play':'M156 92 L420 256 L156 420 Z',
+  'player-pause':'M140 96h84v320h-84zM288 96h84v320h-84z',
+  'plus':'M222 92h68v130h130v68H290v130h-68V290H92v-68h130z',
+  'minus':'M92 222h328v68H92z',
+  'x':'M144 96l112 112 112-112 48 48-112 112 112 112-48 48-112-112-112 112-48-48 112-112-112-112z',
+  'arrow-left':'M228 92L64 256l164 164 48-48-82-82h254v-68H194l82-82z',
+  'chevron-down':'M92 180l48-48 116 116 116-116 48 48-164 164z',
+  'chevron-right':'M180 92l-48 48 116 116-116 116 48 48 164-164z',
+  'circle-dot':'M256 168a88 88 0 1 0 .1 0z',
+}
 CHARGES = {
   'c-lion':'lion','c-wolf':'wolf-head','c-eagle':'eagle-emblem','c-stag':'stag-head','c-bear':'bear-head','c-tower':'stone-tower',
   'c-griffin':'griffin-symbol','c-unicorn':'unicorn','c-rose':'rose','c-snake':'snake','c-raven':'raven','c-boar':'boar','c-sun':'sun',
@@ -27,28 +48,22 @@ CHARGES = {
   'c-pine':'pine-tree','c-howl':'wolf-howl','c-serpent':'sea-serpent','c-fox':'fox-head',
 }
 
-def tabler(path):
+def symbols(path):
     data = json.load(open(path)); icons = data['icons']; out = {}
-    for name in TABLER:
-        key = name if name in icons else data['aliases'][name]['parent']
-        body = icons[key]['body']
-        parts = []
-        for el in re.finditer(r'<path([^>]*)/?>', body):
-            attrs = el.group(1)
-            d = re.search(r'\sd="([^"]+)"', attrs).group(1)
-            parts.append([d, 1 if 'fill="currentColor"' in attrs else 0])
-        if not parts:
-            raise SystemExit(f'no paths in {name}')
-        out[name] = parts
+    for key, name in SYMBOLS.items():
+        ds = re.findall(r'\sd="([^"]+)"', icons[name]['body'])
+        out[key] = [[' '.join(ds), 1]]
+    for key, d in HANDMADE.items():
+        out[key] = [[d, 1]]
     return out
 
 def charges(path):
     icons = json.load(open(path))['icons']
     return {k: ' '.join(re.findall(r'\sd="([^"]+)"', icons[v]['body'])) for k, v in CHARGES.items()}
 
-ti, ch = tabler(sys.argv[1]), charges(sys.argv[2])
+ti, ch = symbols(sys.argv[1]), charges(sys.argv[1])
 with open('src/icons.js', 'w') as f:
-    f.write('/* Symbols: Tabler Icons (MIT, tabler.io). Heraldic charges: game-icons.net by Lorc, Delapouite and contributors (CC BY 3.0). */\n')
+    f.write('/* Symbols and heraldic charges: game-icons.net by Lorc, Delapouite and contributors (CC BY 3.0). Control glyphs drawn for the atlas. All on a 512 grid. */\n')
     f.write('const TI=' + json.dumps(ti, separators=(',', ':')) + ';\n')
     f.write('const CHARGES=' + json.dumps(ch, separators=(',', ':')) + ';\n')
 print(len(ti), 'symbols,', len(ch), 'charges')

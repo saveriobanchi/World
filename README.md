@@ -24,32 +24,54 @@ Each world grows from a random seed: continents with ridged mountain chains, riv
 
 ## The interface
 
-- **Map layers:** Realms (with vassals), Peoples, Faiths, Wars and armies, Diplomacy of the selected realm, Trade, Knowledge, Population and Terrain. Each layer has its own legend.
-- **On the map:** armies with banners, campaign lines and siege rings; outlaws; monsters; plague halos; farmland; drifting clouds; seasonal colours; coats of arms on capitals; a minimap.
-- **The codex:**
-  - *Chronicle:* grouped by year, filterable by importance and by domain.
-  - *Realms:* vassals nested under their overlords.
-  - *Figures:* sovereigns, armies, monsters, outlaws, heroes and great people.
-  - *Ages:* a timeline of every realm's life.
-  - *Almanac:* world statistics, shares of peoples and faiths, the frontier of knowledge, and records.
-- **Detail pages** cover every realm, city, army, war, monster, person and ruin, with back navigation.
-- **Search** with `/` or Ctrl/Cmd+K. Hover cards, toasts for great events, a follow camera and a generative soundtrack.
-- **Keyboard:** `Space` play/pause, `1`–`5` speed, `F` follow, `B` toggle the codex, `Esc` back.
+The page is laid out like a Byzantine imperial codex on a cartographer's table. The painted chart fills the screen inside an engraver's neatline. Around it lie the instruments of a scriptorium:
 
-The world is saved in your browser and catches up while you are away: two years per minute, up to 250 years.
+- **The astrolabe** at the top is the clock of the world. Its needle sweeps through the four seasons, the brass button pauses time, and the crimson banner gives the season and the year, *Anno 412 · CDXII*. The Roman numerals beneath set the pace.
+- **The cartouche** carries the world's name in gold-leaf blackletter and the current age.
+- **Wax seals** (top right) open the Index (search), the follow camera, the music of the spheres, the settings and the codex.
+- **Layer medallions** (left) switch the map between realms, peoples, faiths, wars and armies, diplomacy, trade, knowledge, population and bare terrain. Each layer has a legend slip with heraldic-shield swatches.
+- **The codex** (right) is a leaf of purple-dyed vellum, bookmarked with five silk ribbons:
+  - *Chronicle:* years rubricated as *Anno* in red, legends opened with blackletter initials, ages marked by gilt titles.
+  - *Realms:* vassals nested under their overlords.
+  - *Figures:* rulers, armies, monsters, outlaws, heroes and great minds.
+  - *Ages:* a timeline of every realm.
+  - *Almanac:* the world's ledger and records.
+- **Detail pages** for every realm, city, army, war, beast and person are kept like ledgers, with dotted leaders rather than dashboard cards: arms and blazon, line of rulers, works, peoples, knowledge and diplomacy.
+- **The scroll** at the bottom, between its wooden rods, charts every realm's population through the centuries. **The inset map** beside it shows where you are looking.
+- **Heralds** unfurl a banner for each great event. The **Index** (`/` or Ctrl/Cmd+K) finds anything by name.
+- **Keyboard:** `Space` pause, `1`–`5` pace, `F` follow, `B` codex, `Esc` back.
+
+The world is saved in your browser and catches up while you are away (two years per minute, up to 250 years).
 
 ## Design system
 
-- **Colour.** One dark theme with a single accent (candle-gold). Every event belongs to a domain (War, Politics, Society, Faith, Economy, Nature, Disaster, Magic, Monsters, Knowledge, Death). Each domain has one colour, used everywhere that event appears: chronicle chips, filters, toasts and map ripples.
-- **Type.** Fraunces for names in the world, Manrope for the interface, Geist Mono for numbers.
-- **Symbols.** Tabler Icons, one stroke weight, drawn the same way in the interface and on the map.
+- **Materials.** Murex-purple vellum with a generated fibre texture, double gilt rules and engraved corner fleurons. Text is in gold and silver ink. Gold leaf is reserved for names: the world, ages, realms and the Index.
+- **Domains.** Every event belongs to a domain. Each domain has a medieval pigment and a planetary or alchemical sigil, drawn for the atlas:
+
+  | Sigil | Domain | Pigment |
+  |---|---|---|
+  | ♂ | War | vermilion |
+  | ♃ | Politics | gold leaf |
+  | ♀ | Society | rose madder |
+  | ☉ | Faith | lead white |
+  | ☿ | Trade | malachite |
+  | 🜃 | Nature | sap green |
+  | 🜂 | Calamity | orpiment |
+  | ☽ | Magic | orchil |
+  | ⚸ | Monsters | dragon's blood |
+  | 🜔 | Knowledge | lapis |
+  | ♄ | Death | bone black |
+
+  The same sigil and pigment mark an event in the chronicle, its filter, its herald banner and its ripple on the map.
+- **Symbols.** Engraved silhouettes from game-icons.net, used everywhere: inside enamel roundels in the chronicle, as seals and medallions in the controls, and as tokens on the map. The same collection supplies the heraldic charges.
+- **Letters.** Grenze Gotisch (blackletter) for names and titles, EB Garamond with old-style figures for the text, and Cormorant SC for rubrics and labels.
 
 ## Building
 
-The source lives in `src/`: `icons`, `core`, `data`, `terrain`, `heraldry`, `sim`, `render`, `audio`, `ui` and `main`, plus `style.css` and `shell.html`. `./build.sh` inlines everything into `world.html` (the published page) and `index.html` (standalone). `src/icons.js` is generated by `tools/extract_icons.py` from the `@iconify-json/tabler` and `@iconify-json/game-icons` npm packages.
+The source lives in `src/`: `icons`, `core`, `data`, `terrain`, `heraldry`, `sim`, `render`, `audio`, `ui` and `main`, plus `style.css` and `shell.html`. `./build.sh` inlines everything into `world.html` (the published page) and `index.html` (standalone). `src/icons.js` is generated by `tools/extract_icons.py` from the `@iconify-json/game-icons` npm package.
 
 ## Credits
 
-- Symbols: [Tabler Icons](https://tabler.io/icons), MIT licence.
-- Heraldic charges: [game-icons.net](https://game-icons.net) by Lorc, Delapouite and contributors, [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/).
-- Fonts: Fraunces, Manrope and Geist Mono from Google Fonts, SIL Open Font License.
+- Symbols and heraldic charges: [game-icons.net](https://game-icons.net) by Lorc, Delapouite and contributors, [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/).
+- Fonts: Grenze Gotisch, EB Garamond and Cormorant SC from Google Fonts, SIL Open Font License.
+- Sigils, ornaments, the astrolabe, textures and terrain are drawn or generated by the atlas itself.

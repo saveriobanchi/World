@@ -1,17 +1,25 @@
 /* =====================================================================
    DATA · domains, categories, seasons, knowledge, buildings, tenets
    ===================================================================== */
-// Every event belongs to a domain; the domain sets its colour everywhere it appears.
+// Every event belongs to a domain. Each domain has a medieval pigment and a planetary or alchemical sigil.
 const DOMAIN={
-  war:{n:'War',c:'#ff6b5b'},politics:{n:'Politics',c:'#f4c06a'},people:{n:'Society',c:'#6cc3ff'},faith:{n:'Faith',c:'#b79cff'},
-  economy:{n:'Economy',c:'#3ad1a9'},nature:{n:'Nature',c:'#9bd46a'},disaster:{n:'Disaster',c:'#ff9a4d'},magic:{n:'Magic',c:'#f07ff2'},
-  monster:{n:'Monsters',c:'#ff5f8f'},knowledge:{n:'Knowledge',c:'#7aa7ff'},death:{n:'Death',c:'#9aa3b5'},
+  war:{n:'War',c:'#e8603f',p:'vermilion',sig:'M10 14m-5 0a5 5 0 1 0 10 0a5 5 0 1 0-10 0M13.6 10.4L20 4M14.5 4H20V9.5'},
+  politics:{n:'Politics',c:'#e6b85c',p:'gold leaf',sig:'M5 9c0-4 7-5 7.5-.5C13 12 5 16 5 16h14M15.5 4v16'},
+  people:{n:'Society',c:'#e88fa6',p:'rose madder',sig:'M12 9m-5 0a5 5 0 1 0 10 0a5 5 0 1 0-10 0M12 14v7M8.5 17.5h7'},
+  faith:{n:'Faith',c:'#efe3c4',p:'lead white',sig:'M12 12m-8 0a8 8 0 1 0 16 0a8 8 0 1 0-16 0M12 12m-1.4 0a1.4 1.4 0 1 0 2.8 0a1.4 1.4 0 1 0-2.8 0'},
+  economy:{n:'Trade',c:'#5cbf93',p:'malachite',sig:'M8 2.5c0 3.2 8 3.2 8 0M12 10m-4 0a4 4 0 1 0 8 0a4 4 0 1 0-8 0M12 14v7M8.5 17.5h7'},
+  nature:{n:'Nature',c:'#a3c76c',p:'sap green',sig:'M4 5h16L12 20ZM7.2 10.5h9.6'},
+  disaster:{n:'Calamity',c:'#f29c43',p:'orpiment',sig:'M12 4L20.5 19.5h-17Z'},
+  magic:{n:'Magic',c:'#c7a2f4',p:'orchil',sig:'M15 3.5a8.5 8.5 0 1 0 0 17a7 7 0 1 1 0-17Z'},
+  monster:{n:'Monsters',c:'#d6455b',p:'dragon’s blood',sig:'M14 2.5a6 6 0 1 0 0 11a4.8 4.8 0 1 1 0-11ZM10.5 13.5v8M7 18h7'},
+  knowledge:{n:'Knowledge',c:'#78a3ee',p:'lapis',sig:'M12 12m-7.5 0a7.5 7.5 0 1 0 15 0a7.5 7.5 0 1 0-15 0M4.5 12h15'},
+  death:{n:'Death',c:'#aaa29c',p:'bone black',sig:'M7 4.5h7M10.5 2v13c0-4.5 7-4.5 7 .5c0 3-3 3.5-3 6'},
 };
 const DOMAIN_KEYS=Object.keys(DOMAIN);
 const CAT={
   war:['swords','war'],battle:['sword','war'],siege:['building-fortress','war'],capture:['flag-2','war'],revolt:['flame','war'],army:['helmet','war'],
   bandit:['mask','war'],pirate:['anchor','war'],general:['military-award','war'],
-  peace:['leaf','politics'],ally:['heart-handshake','politics'],crown:['crown','politics'],rise:['award','politics'],fall:['shield-x','politics'],
+  peace:['dove','politics'],ally:['heart-handshake','politics'],crown:['crown','politics'],rise:['award','politics'],fall:['shield-x','politics'],
   castle:['building-castle','politics'],vassal:['link','politics'],independence:['shield-half','politics'],marriage:['hand-ring-finger','politics'],
   golden:['sun','politics'],era:['hourglass','politics'],intrigue:['spy','politics'],law:['gavel','politics'],union:['crown','politics'],
   birth:['baby-carriage','people'],found:['home','people'],people:['campfire','people'],migration:['walk','people'],festival:['confetti','people'],

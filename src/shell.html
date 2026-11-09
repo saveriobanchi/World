@@ -2,7 +2,7 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500;1,9..144,600&family=Manrope:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Grenze+Gotisch:wght@500;600;700&family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=Cormorant+SC:wght@500;600;700&display=swap">
 <style>/*@@CSS@@*/</style>
 
 <div class="app" id="app">
@@ -11,86 +11,95 @@
     <div class="hovercard" id="tip" hidden></div>
   </section>
 
-  <!-- top bar -->
-  <header class="topbar">
-    <div class="brand glass">
-      <svg class="emblem" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="18.5" fill="none" stroke="currentColor" stroke-opacity=".35"/><path d="M20 3 L23 17 L37 20 L23 23 L20 37 L17 23 L3 20 L17 17 Z" fill="currentColor"/><circle cx="20" cy="20" r="3.2" fill="#0d1018"/></svg>
-      <div class="brand-txt">
-        <div class="world" id="worldName">&nbsp;</div>
-        <div class="era"><svg class="i"><use href="#i-hourglass"/></svg><span id="eraName">&nbsp;</span></div>
-      </div>
-    </div>
-    <div class="capsule glass" role="group" aria-label="Time">
-      <div class="when">
-        <span class="season-ico" id="seasonIco"><svg class="i"><use href="#i-seedling"/></svg></span>
-        <div class="date"><span class="season" id="seasonName">Spring</span><span class="yr">Year <b id="year">0</b></span></div>
-      </div>
-      <button class="play" id="playBtn" type="button" aria-label="Pause" data-tip="Pause or resume  ·  Space"><svg class="i"><use id="playUse" href="#i-player-pause"/></svg></button>
-      <div class="speeds" id="speedSeg" role="group" aria-label="Seasons per second">
-        <button type="button" data-s=".5" aria-pressed="false" data-tip="Half a season per second">½×</button>
-        <button type="button" data-s="1" aria-pressed="true" data-tip="One season per second">1×</button>
-        <button type="button" data-s="2" aria-pressed="false" data-tip="Two seasons per second">2×</button>
-        <button type="button" data-s="4" aria-pressed="false" data-tip="A year per second">4×</button>
-        <button type="button" data-s="8" aria-pressed="false" data-tip="Two years per second">8×</button>
-      </div>
-      <div class="season-bar"><i id="seasonBar"></i></div>
-    </div>
-    <div class="tools glass">
-      <button class="tool" type="button" id="searchBtn" data-tip="Search the world  ·  /"><svg class="i"><use href="#i-search"/></svg></button>
-      <button class="tool" type="button" id="followBtn" aria-pressed="false" data-tip="Follow great events with the camera  ·  F"><svg class="i"><use href="#i-focus-centered"/></svg></button>
-      <button class="tool" type="button" id="soundBtn" aria-pressed="false" data-tip="Generative soundtrack"><svg class="i"><use id="soundUse" href="#i-volume-off"/></svg></button>
-      <button class="tool" type="button" id="settingsBtn" aria-expanded="false" data-tip="Display &amp; world settings"><svg class="i"><use href="#i-adjustments-horizontal"/></svg></button>
-      <button class="tool" type="button" id="sideBtn" data-tip="Show or hide the codex  ·  B"><svg class="i"><use id="sideUse" href="#i-layout-sidebar-right-collapse"/></svg></button>
-    </div>
+  <!-- cartouche -->
+  <header class="cartouche" id="cartouche">
+    <div class="c-name" id="worldName">&nbsp;</div>
+    <div class="c-era"><span class="c-orn"></span><span id="eraName">&nbsp;</span><span class="c-orn"></span></div>
   </header>
 
-  <!-- settings popover -->
-  <div class="popover glass" id="settings" hidden>
-    <div class="pop-title">Display</div>
-    <label class="row-toggle"><span><svg class="i"><use href="#i-cloud"/></svg>Drifting clouds</span><input type="checkbox" id="optClouds" checked></label>
-    <label class="row-toggle"><span><svg class="i"><use href="#i-wheat"/></svg>Farmland</span><input type="checkbox" id="optFarms" checked></label>
-    <div class="row-toggle"><span><svg class="i"><use href="#i-map-pin"/></svg>Labels</span>
-      <div class="mini-seg" id="optLabels"><button type="button" data-v="0">Off</button><button type="button" data-v="1">Few</button><button type="button" data-v="2" aria-pressed="true">All</button></div></div>
-    <div class="pop-title">World</div>
-    <div class="pop-note" id="seedNote"></div>
-    <button class="btn danger" type="button" id="newBtn"><svg class="i"><use href="#i-refresh"/></svg><span>Roll a new world</span></button>
-    <div class="pop-title">Keyboard</div>
-    <div class="keys"><span><kbd>Space</kbd> play / pause</span><span><kbd>1</kbd>–<kbd>5</kbd> speed</span><span><kbd>/</kbd> search</span><span><kbd>F</kbd> follow</span><span><kbd>B</kbd> codex</span><span><kbd>Esc</kbd> back</span></div>
+  <!-- astrolabe: the clock of the world -->
+  <div class="astro" role="group" aria-label="Time">
+    <svg class="astro-dial" viewBox="0 0 200 200" aria-hidden="true">
+      <defs>
+        <radialGradient id="brass" cx="38%" cy="30%" r="80%"><stop offset="0" stop-color="#f7dd97"/><stop offset=".45" stop-color="#c99a45"/><stop offset=".8" stop-color="#7d5a22"/><stop offset="1" stop-color="#4a3312"/></radialGradient>
+        <radialGradient id="tympan" cx="50%" cy="40%" r="70%"><stop offset="0" stop-color="#3a2340"/><stop offset="1" stop-color="#150c18"/></radialGradient>
+        <linearGradient id="needle" x1="0" x2="1"><stop offset="0" stop-color="#8c6b2c"/><stop offset=".5" stop-color="#f7dd97"/><stop offset="1" stop-color="#8c6b2c"/></linearGradient>
+      </defs>
+      <circle cx="100" cy="100" r="97" fill="url(#brass)"/>
+      <circle cx="100" cy="100" r="97" fill="none" stroke="#2a1c0b" stroke-width="1.5"/>
+      <g id="astroTicks"></g>
+      <circle cx="100" cy="100" r="78" fill="url(#tympan)" stroke="#2a1c0b" stroke-width="2"/>
+      <g id="astroSeasons"></g>
+      <g id="astroStars" opacity=".55"></g>
+      <g id="rete"><path d="M100 100 L100 30" stroke="url(#needle)" stroke-width="3" stroke-linecap="round"/><path d="M100 24 l5 9 -5 -3 -5 3z" fill="#f7dd97" stroke="#4a3312" stroke-width=".8"/><circle cx="100" cy="100" r="44" fill="none" stroke="#d9b25a" stroke-opacity=".35" stroke-dasharray="2 4"/></g>
+    </svg>
+    <button class="astro-btn" id="playBtn" type="button" aria-label="Pause" data-tip="Pause or resume · Space"><svg class="i"><use id="playUse" href="#i-player-pause"/></svg></button>
+    <div class="astro-banner">
+      <span class="ab-season" id="seasonName">Spring</span>
+      <span class="ab-year">Anno <b id="year">0</b></span>
+      <span class="ab-roman" id="yearRoman"></span>
+    </div>
+    <div class="astro-speed" id="speedSeg" role="group" aria-label="Seasons per second">
+      <button type="button" data-s=".5" aria-pressed="false" data-tip="Half a season each second">½</button>
+      <button type="button" data-s="1" aria-pressed="true" data-tip="A season each second">I</button>
+      <button type="button" data-s="2" aria-pressed="false" data-tip="Two seasons each second">II</button>
+      <button type="button" data-s="4" aria-pressed="false" data-tip="A year each second">IV</button>
+      <button type="button" data-s="8" aria-pressed="false" data-tip="Two years each second">VIII</button>
+    </div>
+  </div>
+
+  <!-- seals -->
+  <div class="seals">
+    <button class="seal" type="button" id="searchBtn" data-tip="The index · /"><svg class="i"><use href="#i-search"/></svg></button>
+    <button class="seal" type="button" id="followBtn" aria-pressed="false" data-tip="Follow great events · F"><svg class="i"><use href="#i-focus-centered"/></svg></button>
+    <button class="seal" type="button" id="soundBtn" aria-pressed="false" data-tip="Music of the spheres"><svg class="i"><use id="soundUse" href="#i-volume-off"/></svg></button>
+    <button class="seal" type="button" id="settingsBtn" aria-expanded="false" data-tip="Settings"><svg class="i"><use href="#i-adjustments-horizontal"/></svg></button>
+    <button class="seal" type="button" id="sideBtn" data-tip="Open or close the codex · B"><svg class="i"><use id="sideUse" href="#i-layout-sidebar-right-collapse"/></svg></button>
+  </div>
+
+  <div class="popover vellum" id="settings" hidden>
+    <div class="pop-title">The map</div>
+    <label class="lz"><input type="checkbox" id="optClouds" checked><span class="lz-box"></span><span>Drifting clouds</span></label>
+    <label class="lz"><input type="checkbox" id="optFarms" checked><span class="lz-box"></span><span>Fields &amp; farmland</span></label>
+    <div class="lz-row"><span>Names on the map</span><div class="txt-seg" id="optLabels"><button type="button" data-v="0">none</button><button type="button" data-v="1">few</button><button type="button" data-v="2" aria-pressed="true">all</button></div></div>
+    <div class="pop-title">The world</div>
+    <p class="pop-note" id="seedNote"></p>
+    <button class="btn-seal danger" type="button" id="newBtn"><svg class="i"><use href="#i-refresh"/></svg><span>Unmake this world &amp; begin anew</span></button>
+    <div class="pop-title">Keys</div>
+    <div class="keys"><span><kbd>Space</kbd> pause</span><span><kbd>1</kbd>–<kbd>5</kbd> pace</span><span><kbd>/</kbd> index</span><span><kbd>F</kbd> follow</span><span><kbd>B</kbd> codex</span><span><kbd>Esc</kbd> back</span></div>
   </div>
 
   <!-- layers -->
-  <nav class="dock glass" aria-label="Map layers" id="modeRail">
+  <nav class="medals" aria-label="Map layers" id="modeRail">
     <button type="button" data-m="realms" aria-pressed="true" data-tip="Realms &amp; vassals"><svg class="i"><use href="#i-building-castle"/></svg></button>
     <button type="button" data-m="peoples" aria-pressed="false" data-tip="Peoples"><svg class="i"><use href="#i-users"/></svg></button>
     <button type="button" data-m="faith" aria-pressed="false" data-tip="Faiths"><svg class="i"><use href="#i-building-church"/></svg></button>
     <button type="button" data-m="military" aria-pressed="false" data-tip="Wars &amp; armies"><svg class="i"><use href="#i-swords"/></svg></button>
-    <button type="button" data-m="diplomacy" aria-pressed="false" data-tip="Diplomacy of the selected realm"><svg class="i"><use href="#i-heart-handshake"/></svg></button>
+    <button type="button" data-m="diplomacy" aria-pressed="false" data-tip="Friends &amp; foes of a realm"><svg class="i"><use href="#i-heart-handshake"/></svg></button>
     <button type="button" data-m="trade" aria-pressed="false" data-tip="Trade &amp; resources"><svg class="i"><use href="#i-route"/></svg></button>
     <button type="button" data-m="knowledge" aria-pressed="false" data-tip="Knowledge"><svg class="i"><use href="#i-flask"/></svg></button>
-    <button type="button" data-m="density" aria-pressed="false" data-tip="Population density"><svg class="i"><use href="#i-chart-dots"/></svg></button>
-    <button type="button" data-m="terrain" aria-pressed="false" data-tip="Bare terrain"><svg class="i"><use href="#i-mountain"/></svg></button>
-    <span class="dock-sep"></span>
-    <button type="button" id="zin" aria-label="Zoom in" data-tip="Zoom in"><svg class="i"><use href="#i-plus"/></svg></button>
-    <button type="button" id="zout" aria-label="Zoom out" data-tip="Zoom out"><svg class="i"><use href="#i-minus"/></svg></button>
-    <button type="button" id="zreset" aria-label="Fit the world" data-tip="Fit the world"><svg class="i"><use href="#i-world"/></svg></button>
+    <button type="button" data-m="density" aria-pressed="false" data-tip="Where people live"><svg class="i"><use href="#i-chart-dots"/></svg></button>
+    <button type="button" data-m="terrain" aria-pressed="false" data-tip="The bare land"><svg class="i"><use href="#i-mountain"/></svg></button>
+    <span class="fleuron" aria-hidden="true"></span>
+    <button type="button" id="zin" aria-label="Zoom in" data-tip="Draw nearer"><svg class="i"><use href="#i-plus"/></svg></button>
+    <button type="button" id="zout" aria-label="Zoom out" data-tip="Draw back"><svg class="i"><use href="#i-minus"/></svg></button>
+    <button type="button" id="zreset" aria-label="See the whole world" data-tip="The whole world"><svg class="i"><use href="#i-compass"/></svg></button>
   </nav>
-  <aside class="legend glass" id="legend" aria-live="polite"></aside>
+  <aside class="legend vellum" id="legend" aria-live="polite"></aside>
 
-  <!-- codex -->
-  <aside class="side glass" id="side">
-    <nav class="nav" role="tablist" id="nav">
-      <button type="button" role="tab" data-tab="chronicle" aria-selected="true"><svg class="i"><use href="#i-list"/></svg><span>Chronicle</span></button>
-      <button type="button" role="tab" data-tab="realms" aria-selected="false"><svg class="i"><use href="#i-building-castle"/></svg><span>Realms</span></button>
-      <button type="button" role="tab" data-tab="figures" aria-selected="false"><svg class="i"><use href="#i-users-group"/></svg><span>Figures</span></button>
-      <button type="button" role="tab" data-tab="ages" aria-selected="false"><svg class="i"><use href="#i-timeline"/></svg><span>Ages</span></button>
-      <button type="button" role="tab" data-tab="almanac" aria-selected="false"><svg class="i"><use href="#i-trophy"/></svg><span>Almanac</span></button>
+  <!-- the codex -->
+  <aside class="codex vellum" id="side">
+    <nav class="ribbons" role="tablist" id="nav">
+      <button type="button" role="tab" data-tab="chronicle" aria-selected="true" style="--rb:#2f4f8f"><svg class="i"><use href="#i-list"/></svg><span>Chronicle</span></button>
+      <button type="button" role="tab" data-tab="realms" aria-selected="false" style="--rb:#9a3324"><svg class="i"><use href="#i-building-castle"/></svg><span>Realms</span></button>
+      <button type="button" role="tab" data-tab="figures" aria-selected="false" style="--rb:#2f6b4e"><svg class="i"><use href="#i-users-group"/></svg><span>Figures</span></button>
+      <button type="button" role="tab" data-tab="ages" aria-selected="false" style="--rb:#8a6a24"><svg class="i"><use href="#i-timeline"/></svg><span>Ages</span></button>
+      <button type="button" role="tab" data-tab="almanac" aria-selected="false" style="--rb:#5c3a78"><svg class="i"><use href="#i-trophy"/></svg><span>Almanac</span></button>
     </nav>
     <div class="view" id="view-chronicle">
       <div class="filters">
-        <div class="seg" id="levelSeg" role="group" aria-label="Importance">
-          <button type="button" data-l="0">All</button><button type="button" data-l="1" aria-pressed="true">Notable</button><button type="button" data-l="2">Legends</button>
-        </div>
-        <div class="domains" id="domainChips"></div>
+        <div class="txt-seg big" id="levelSeg" role="group" aria-label="Importance"><button type="button" data-l="0">every deed</button><button type="button" data-l="1" aria-pressed="true">the notable</button><button type="button" data-l="2">legends only</button></div>
+        <div class="sigils" id="domainChips"></div>
       </div>
       <div class="scroll" id="logScroll"><div class="log" id="log"></div></div>
     </div>
@@ -99,32 +108,33 @@
     <div class="view scroll" id="view-ages" hidden><canvas id="ages"></canvas></div>
     <div class="view scroll" id="view-almanac" hidden></div>
     <div class="view" id="view-detail" hidden>
-      <div class="crumbs"><button type="button" class="back" id="backBtn"><svg class="i"><use href="#i-arrow-left"/></svg><span id="backLbl">Back</span></button><button type="button" class="tool sm" id="locateBtn" data-tip="Show on the map"><svg class="i"><use href="#i-crosshair"/></svg></button></div>
+      <div class="crumbs"><button type="button" class="back" id="backBtn"><svg class="i"><use href="#i-arrow-left"/></svg><span id="backLbl">Back</span></button><button type="button" class="seal sm" id="locateBtn" data-tip="Find it on the map"><svg class="i"><use href="#i-crosshair"/></svg></button></div>
       <div class="scroll detail" id="detail"></div>
     </div>
   </aside>
 
-  <!-- bottom -->
-  <section class="mini glass" aria-label="Minimap"><canvas id="minimap"></canvas></section>
-  <section class="strip glass" aria-label="World statistics">
+  <!-- inset map & the scroll of years -->
+  <section class="inset" aria-label="Inset map"><canvas id="minimap"></canvas></section>
+  <section class="scrollband" aria-label="Population through the years">
+    <span class="rod l" aria-hidden="true"></span><span class="rod r" aria-hidden="true"></span>
     <div class="kpis" id="kpis"></div>
     <div class="chart-box"><canvas id="chart"></canvas><div class="chart-tip" id="chartTip" hidden></div></div>
   </section>
 
-  <div class="toasts" id="toasts" aria-live="polite"></div>
+  <div class="heralds" id="toasts" aria-live="polite"></div>
   <div class="scrim" id="scrim" hidden></div>
-  <div class="palette glass" id="palette" hidden role="dialog" aria-label="Search">
-    <div class="pal-in"><svg class="i"><use href="#i-search"/></svg><input id="palInput" type="text" placeholder="Search realms, cities, people, monsters…" autocomplete="off" spellcheck="false"><kbd>Esc</kbd></div>
-    <div class="pal-res" id="palRes"></div>
+  <div class="index vellum" id="palette" hidden role="dialog" aria-label="Index">
+    <div class="idx-title">Index</div>
+    <div class="idx-in"><svg class="i"><use href="#i-search"/></svg><input id="palInput" type="text" placeholder="a realm, a city, a person, a beast…" autocomplete="off" spellcheck="false"><kbd>Esc</kbd></div>
+    <div class="idx-res" id="palRes"></div>
   </div>
-  <div class="modal glass" id="banner" hidden></div>
+  <div class="modal vellum" id="banner" hidden></div>
   <div class="loading" id="loading">
-    <svg class="emblem big" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="18.5" fill="none" stroke="currentColor" stroke-opacity=".35"/><path d="M20 3 L23 17 L37 20 L23 23 L20 37 L17 23 L3 20 L17 17 Z" fill="currentColor"/><circle cx="20" cy="20" r="3.2" fill="#0d1018"/></svg>
+    <svg class="load-astro" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="46" fill="none" stroke="#d9b25a" stroke-width="1.5"/><circle cx="50" cy="50" r="38" fill="none" stroke="#d9b25a" stroke-opacity=".4" stroke-dasharray="1 3"/><path d="M50 8 L54 46 L92 50 L54 54 L50 92 L46 54 L8 50 L46 46 Z" fill="#d9b25a"/><circle cx="50" cy="50" r="4" fill="#150c18"/></svg>
     <div class="load-title">The Living Atlas</div>
-    <div class="load-bar"><i></i></div>
     <div class="load-sub" id="loadingSub">Raising mountains…</div>
   </div>
-  <footer class="credit">Symbols <a href="https://tabler.io/icons" target="_blank" rel="noopener">Tabler Icons</a> (MIT) · Heraldic charges <a href="https://game-icons.net" target="_blank" rel="noopener">game-icons.net</a> (CC BY 3.0) · Type: Fraunces, Manrope, Geist Mono (OFL)</footer>
+  <footer class="credit">Symbols &amp; heraldry <a href="https://game-icons.net" target="_blank" rel="noopener">game-icons.net</a> (CC BY 3.0) · Letters: Grenze Gotisch, EB Garamond, Cormorant SC (OFL)</footer>
 </div>
 <div id="sprite" aria-hidden="true"></div>
 

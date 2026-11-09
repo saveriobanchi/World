@@ -16,7 +16,7 @@ function frame(now){
   const dt=Math.min(.25,(now-last)/1000);last=now;
   if(S&&playing){acc+=dt*speed;let n=0,y0=S.year;while(acc>=1&&n<16){stepSeason();acc-=1;n++}if(n)afterTicks(S.year!==y0)}
   if(S){
-    $('#seasonBar').style.width=(playing?clamp(acc,0,1)*100:0)+'%';
+    setRete(clamp(acc,0,.999));
     if(dirtyPol&&now-lastPol>(speed>=4&&playing?200:0)){lastPol=now;rebuildPol()}
     if(chartDirty)drawChart();
     if(uiDirty&&now-lastUi>600){lastUi=now;uiDirty=false;renderCurrent();if(mode!=='terrain')renderLegend()}
