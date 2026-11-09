@@ -363,7 +363,8 @@ h4.h::after{content:"";flex:1;height:1px;background:var(--line)}
 .modal .log,.modal .btn-line{position:relative;z-index:1}
 .modal .btn-line{margin-top:18px}
 .loading{position:fixed;inset:0;z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:radial-gradient(60% 55% at 50% 45%,#1d1813,#0a0908)}
-.load-star{width:96px;height:96px;animation:spin 20s linear infinite}
+.load-card{width:min(230px,42vw);aspect-ratio:540/732;border-radius:14px;box-shadow:0 40px 90px -30px #000,0 0 0 1px rgba(207,169,96,.22);animation:hover 5s ease-in-out infinite alternate}
+@keyframes hover{from{transform:translateY(-4px)}to{transform:translateY(5px)}}
 @keyframes spin{to{transform:rotate(360deg)}}
 .load-title{font-weight:500;font-size:28px;letter-spacing:.42em;text-transform:uppercase;margin-right:-.42em}
 .load-sub{color:var(--bone-3);font-style:italic;font-size:17px;animation:breathe 1.8s ease-in-out infinite alternate}
@@ -395,4 +396,11 @@ h4.h::after{content:"";flex:1;height:1px;background:var(--line)}
   [data-tip]:hover::after{display:none}
   #sideBtn{display:none}
 }
-@media (prefers-reduced-motion:reduce){.ev.fresh,.herald,.load-star,.load-sub{animation:none}.codex,.strip{transition:none}}
+@media (prefers-reduced-motion:reduce){.ev.fresh,.herald,.load-card,.load-sub{animation:none}.codex,.strip{transition:none}}
+
+/* engraved emblems, tinted through a mask */
+.emb{display:inline-block;flex:none;width:1em;height:1em;background:currentColor;-webkit-mask-size:contain;mask-size:contain;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-position:center;mask-position:center}
+.emb.sigil{width:1.1em;height:1.1em;vertical-align:-.18em}
+.sg .emb{width:18px;height:18px}
+.ev .ic .emb{width:20px;height:20px}
+.herald .ic .emb{width:30px;height:30px}

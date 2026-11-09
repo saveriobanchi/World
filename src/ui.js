@@ -9,7 +9,10 @@
 const ico=(k,cls='i')=>`<svg class="${cls}" aria-hidden="true"><use href="#i-${TI[k]?k:'circle-dot'}"/></svg>`;
 const icd=(k,d)=>`<span class="ic" style="--d:${pal(d)}">${ico(k)}</span>`;
 const chip=c=>icd(catIcon(c),catDom(c));
-const sigil=d=>`<svg class="sigil" viewBox="0 0 24 24" aria-hidden="true"><path d="${DOMAIN[d].sig}"/></svg>`;
+// domain emblems: engraved art (assets/emblems) used as masks, so each takes its domain's ink
+(function emblemStyles(){const st=document.createElement('style');st.textContent=Object.entries(ART.emblem).map(([k,u])=>`.e-${k}{-webkit-mask-image:url(${u});mask-image:url(${u})}`).join('');document.head.appendChild(st)})();
+const emb=(d,cls='')=>`<i class="emb e-${ART.emblem[d]?d:'era'} ${cls}" aria-hidden="true"></i>`;
+const sigil=d=>emb(d,'sigil');
 const tag=(t,cls='')=>`<span class="tag ${cls}">${t}</span>`;
 
 let playing=true,speed=1,acc=0,last=performance.now(),uiDirty=true,lastUi=0,logLevel=1,tab='chronicle',realmSort='pop',sideOpen=true,fallenOpen=false,legendCollapsed=window.innerWidth<1000;
@@ -17,12 +20,12 @@ let domOff=new Set();const navStack=[];
 const logEl=$('#log');
 
 /* ---------- chronicle ---------- */
-function domainChips(){$('#domainChips').innerHTML=DOMAIN_KEYS.map(k=>`<button type="button" class="sg" data-d="${k}" aria-pressed="${!domOff.has(k)}" aria-label="${DOMAIN[k].n}" data-tip="${DOMAIN[k].n}" style="--d:${pal(k)}"><svg viewBox="0 0 24 24"><path d="${DOMAIN[k].sig}"/></svg></button>`).join('')}
+function domainChips(){$('#domainChips').innerHTML=DOMAIN_KEYS.map(k=>`<button type="button" class="sg" data-d="${k}" aria-pressed="${!domOff.has(k)}" aria-label="${DOMAIN[k].n}" data-tip="${DOMAIN[k].n}" style="--d:${pal(k)}">${emb(k)}</button>`).join('')}
 const visible=e=>e.i>=logLevel&&(e.i===3||!domOff.has(catDom(e.c)));
 function evEl(e,isFresh){
   if(e.i===3){const d=document.createElement('div');d.className='era-row';d.innerHTML=`<div>${e.t.replace(/^The /,'')}</div><small>Anno ${e.y} · a new age</small>`;return d}
   const d=document.createElement('div');const dom=catDom(e.c);d.className=`ev i${e.i}${isFresh?' fresh':''}`;d.style.setProperty('--d',pal(dom));
-  d.innerHTML=`${chip(e.c)}<div><div class="t">${e.t}</div><div class="meta"><span class="dom">${DOMAIN[dom].n}</span><span>·</span><span>${SEASONS[e.s??0]}</span></div></div>`;return d}
+  d.innerHTML=`${e.i===2?`<span class="ic">${emb(dom)}</span>`:chip(e.c)}<div><div class="t">${e.t}</div><div class="meta"><span class="dom">${DOMAIN[dom].n}</span><span>·</span><span>${SEASONS[e.s??0]}</span></div></div>`;return d}
 function yearHead(y){const h=document.createElement('div');h.className='yearhead';h.dataset.y=y;h.innerHTML=`<span class="y">Anno<b>${y}</b></span><span class="rn">${roman(Math.max(1,y))}</span>`;return h}
 function rebuildLog(){
   logEl.textContent='';const items=S.log.filter(visible).slice(-320).reverse();const f=document.createDocumentFragment();let y=null;
@@ -51,7 +54,7 @@ function flushLog(){
 function toast(e){
   if(e.i===3)return;
   const el=document.createElement('div');el.className='herald';el.style.setProperty('--d',pal(catDom(e.c)));
-  el.innerHTML=`${chip(e.c)}<div><span class="yy">${DOMAIN[catDom(e.c)].n} · ${SEASONS[e.s??0]}, anno ${e.y}</span>${e.t}</div>`;
+  el.innerHTML=`<span class="ic">${emb(catDom(e.c))}</span><div><span class="yy">${DOMAIN[catDom(e.c)].n} · ${SEASONS[e.s??0]}, anno ${e.y}</span>${e.t}</div>`;
   el.addEventListener('click',ev=>{if(ev.target.closest('[data-ref]'))return;if(e.x!=null)flyTo(e.x,e.yy,3);if(e.r[0])selectRef(e.r[0])});
   const box=$('#toasts');box.prepend(el);while(box.children.length>2)box.lastChild.remove();
   setTimeout(()=>{el.classList.add('out');setTimeout(()=>el.remove(),500)},7000);

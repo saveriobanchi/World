@@ -4,14 +4,17 @@
 const TINCT={or:'#d4aa3c',argent:'#ece6d6',gules:'#b3302a',azure:'#2a55a3',vert:'#2d7a46',sable:'#1d1c22',purpure:'#6b3a86',tenne:'#b8682a'};
 const METALS=['or','argent'],COLOURS=['gules','azure','vert','sable','purpure','tenne'];
 const DIVS=['plain','plain','pale','fess','bend','quarterly','chevron','chief','cross','saltire','bordure','fessbar','palebar','bendbar','gyronny'];
+// new houses favour the engraved charges (assets/charges); older arms keep their vector glyphs
 const RACE_CHARGES={
-  human:['lion','eagle','stag','bear','tower','griffin','rose','key','bull','crown','castle','sword','boar','star','sun'],
-  elf:['stag','unicorn','owl','leaf','moon','star','rose','harp','raven','pine','sun','oak','serpent'],
-  dwarf:['anvil','hammer','axe','bear','tower','castle','key','bull','crown','star','dragon'],
-  orc:['skull','howl','boar','fist','axe','spider','snake','dragon','raven','wolf','bull'],
-  halfling:['bee','oak','frog','rose','owl','sun','key','harp','fox','leaf','moon'],
+  human:['lion','eagle','stag','bear','griffin','rose','boar','sun','horse','ship','wolf','raven'],
+  elf:['stag','unicorn','owl','moon','rose','raven','sun','oak','serpent','eagle'],
+  dwarf:['hammer','axe','bear','boar','griffin','lion','eagle','sun'],
+  orc:['skull','wolf','boar','axe','raven','serpent','bear','hammer'],
+  halfling:['oak','rose','owl','sun','moon','horse','stag','boar'],
 };
-const CHARGE_NAME={lion:'a lion',eagle:'an eagle',stag:'a stag’s head',bear:'a bear’s head',tower:'a tower',griffin:'a griffin',rose:'a rose',key:'a key',bull:'a bull',crown:'a crown',castle:'a castle',sword:'a sword',boar:'a boar',star:'a star',sun:'a sun in splendour',unicorn:'a unicorn',owl:'an owl',leaf:'an oak leaf',moon:'a crescent moon',harp:'a harp',raven:'a raven',pine:'a pine tree',oak:'an oak',serpent:'a sea-serpent',anvil:'an anvil',hammer:'a hammer',axe:'an axe',dragon:'a dragon’s head',skull:'a skull',howl:'a howling wolf',fist:'a clenched fist',spider:'a spider',snake:'a serpent',wolf:'a wolf’s head',bee:'a bee',frog:'a frog',fox:'a fox’s head'};
+const CHARGE_NAME={lion:'a lion’s head',eagle:'an eagle displayed',stag:'a stag’s head',bear:'a bear’s head',tower:'a tower',griffin:'a griffin',rose:'a rose',key:'a key',bull:'a bull',crown:'a crown',castle:'a castle',sword:'a sword',boar:'a boar',star:'a star',sun:'a sun in splendour',unicorn:'a unicorn',owl:'an owl',leaf:'an oak leaf',moon:'a crescent and dagger',harp:'a harp',raven:'a raven',pine:'a pine tree',oak:'an oak',serpent:'a sea-serpent',anvil:'an anvil',hammer:'a hammer and pick',axe:'two axes in saltire',dragon:'a dragon’s head',skull:'a horned skull',howl:'a howling wolf',fist:'a clenched fist',spider:'a spider',snake:'a serpent',wolf:'a wolf’s head',bee:'a bee',frog:'a frog',fox:'a fox’s head',horse:'a horse salient',ship:'a galleon'};
+const CHARGE_ART={snake:'serpent',howl:'wolf',anvil:'hammer',pine:'oak',leaf:'oak'};
+const chargeArt=c=>ART.charge[c]?c:ART.charge[CHARGE_ART[c]]?CHARGE_ART[c]:null;
 const CHARGE_KEY={wolf:'c-wolf',howl:'c-howl',leaf:'c-leaf',pine:'c-pine',serpent:'c-serpent'};
 function makeArms(race,parent){
   const metalFirst=chance(.5);
@@ -49,8 +52,8 @@ function armsSVG(a,size,extra=''){
   }
   const big=['plain','bordure','chief'].includes(a.d);
   const cs=big?54:44,cx=50-cs/2,cy=(a.d==='chief'?40:28)+(big?0:4);
-  const key=CHARGE_KEY[a.c]||'c-'+a.c;
-  const charge=CHARGES[key]?`<g transform="translate(${cx} ${cy}) scale(${cs/512})"><path d="${CHARGES[key]}" fill="${ct}" stroke="${a.ct==='sable'?'rgba(255,240,210,.55)':'rgba(0,0,0,.4)'}" stroke-width="12"/></g>`:'';
+  const key=CHARGE_KEY[a.c]||'c-'+a.c,art=chargeArt(a.c);
+  const charge=art?`<image href="${ART.charge[art]}" x="${50-cs*.6}" y="${cy-cs*.1}" width="${cs*1.2}" height="${cs*1.2}" style="filter:${a.ct==='sable'?'brightness(.15)':'none'}"/>`:CHARGES[key]?`<g transform="translate(${cx} ${cy}) scale(${cs/512})"><path d="${CHARGES[key]}" fill="${ct}" stroke="${a.ct==='sable'?'rgba(255,240,210,.55)':'rgba(0,0,0,.4)'}" stroke-width="12"/></g>`:'';
   let mark='';
   if(a.mark==='label')mark=`<path d="M22 14 H78 M30 14 V24 M50 14 V24 M70 14 V24" stroke="${a.ct==='argent'?TINCT.sable:TINCT.argent}" stroke-width="4" fill="none"/>`;
   else if(a.mark==='bordure')mark=`<path d="${SHIELD}" fill="none" stroke="${TINCT.argent}" stroke-width="6" stroke-dasharray="7 5"/>`;
@@ -84,13 +87,13 @@ const STAR4=(x,y,r)=>`M${x} ${y-r}Q${x+r*.18} ${y-r*.18} ${x+r} ${y}Q${x+r*.18} 
 function bannerSVG(r,w,extra=''){
   if(!r||!r.arms)return'';
   const cut=BANNER_CUT[r.race]||BANNER_CUT.human,id='bn'+Math.random().toString(36).slice(2,8);
-  const key=CHARGE_KEY[r.arms.c]||'c-'+r.arms.c,charge=CHARGES[key];
+  const key=CHARGE_KEY[r.arms.c]||'c-'+r.arms.c,charge=CHARGES[key],art=chargeArt(r.arms.c);
   const ivory='#efe5d1',gold='#d6b26a';
   return`<svg class="banner" ${extra} viewBox="0 0 60 100" width="${w}" height="${Math.round(w*100/60)}" aria-hidden="true"><defs><linearGradient id="${id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".16"/><stop offset=".55" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".38"/></linearGradient><clipPath id="${id}c"><path d="${cut}"/></clipPath></defs>
     <path d="${cut}" fill="${r.color}"/><path d="${cut}" fill="url(#${id})"/>
     <g clip-path="url(#${id}c)"><path d="${cut}" fill="none" stroke="${gold}" stroke-opacity=".55" stroke-width="1.4" transform="translate(30 50) scale(.84) translate(-30 -50)"/></g>
     <circle cx="30" cy="40" r="15.5" fill="none" stroke="${ivory}" stroke-opacity=".35" stroke-width=".6"/>
-    ${charge?`<g transform="translate(17.5 27.5) scale(${25/512})"><path d="${charge}" fill="${ivory}"/></g>`:''}
+    ${art?`<image href="${ART.charge[art]}" x="14" y="24" width="32" height="32"/>`:charge?`<g transform="translate(17.5 27.5) scale(${25/512})"><path d="${charge}" fill="${ivory}"/></g>`:''}
     <path d="${STAR4(30,19,2.4)}" fill="${gold}"/><path d="${STAR4(30,62,2)}" fill="${gold}"/><path d="M30 68v6" stroke="${gold}" stroke-opacity=".6" stroke-width=".6"/>
     <rect x="4" y="4.6" width="52" height="2.4" rx="1.2" fill="${gold}"/><circle cx="4" cy="5.8" r="2.3" fill="${gold}"/><circle cx="56" cy="5.8" r="2.3" fill="${gold}"/></svg>`;
 }

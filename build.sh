@@ -3,7 +3,7 @@
 set -euo pipefail
 cd "$(dirname "$0")"
 python3 - <<'EOF'
-order = ['icons', 'core', 'data', 'terrain', 'heraldry', 'sim', 'render', 'audio', 'ui', 'main']
+order = ['art', 'icons', 'core', 'data', 'terrain', 'heraldry', 'sim', 'render', 'audio', 'ui', 'main']
 js = '\n'.join(open(f'src/{m}.js').read() for m in order)
 css = open('src/style.css').read()
 page = open('src/shell.html').read().replace('/*@@CSS@@*/', css).replace('/*@@JS@@*/', js)

@@ -31,24 +31,22 @@ function heightFrac(e,g){
   if(e<g.mount)return .5+(e-g.hill)/(g.mount-g.hill)*.25;
   return .75+(e-g.mount)/(g.peak-g.mount)*.25;
 }
-const C_LUSH=[64,98,52],C_GRASS=[138,150,84],C_DRY=[186,168,110],C_SAND=[220,196,140],C_JUNGLE=[44,84,50],C_COLD=[128,138,124],
-  C_SNOW=[238,240,242],C_ROCK=[118,108,98],C_HILL=[142,130,96],C_MARSH=[84,98,72];
+// kraft-paper cartography: the land is the paper itself, faintly washed by climate
+const K_GRASS=[207,189,149],K_DRY=[216,196,152],K_SAND=[226,207,163],K_WOOD=[182,174,132],K_JUNGLE=[168,166,124],
+  K_COLD=[200,194,176],K_SNOW=[238,233,219],K_ROCK=[184,163,130],K_HILL=[196,174,136],K_MARSH=[182,178,142];
 function landColor(e,m,t,g){
-  let c=mix3(C_DRY,C_GRASS,smooth(.18,.45,m));c=mix3(c,C_LUSH,smooth(.5,.88,m));
-  c=mix3(c,C_SAND,smooth(.5,.7,t)*(1-smooth(.18,.36,m)));
-  c=mix3(c,C_JUNGLE,smooth(.68,.84,t)*smooth(.55,.8,m));
-  c=mix3(c,C_MARSH,smooth(.66,.8,m)*(1-smooth(0,.035,e-g.sea))*.7);
-  c=mix3(c,C_COLD,1-smooth(.2,.42,t));
+  let c=mix3(K_DRY,K_GRASS,smooth(.18,.45,m));c=mix3(c,K_WOOD,smooth(.55,.9,m)*.75);
+  c=mix3(c,K_SAND,smooth(.5,.7,t)*(1-smooth(.18,.36,m)));
+  c=mix3(c,K_JUNGLE,smooth(.68,.84,t)*smooth(.55,.8,m));
+  c=mix3(c,K_MARSH,smooth(.66,.8,m)*(1-smooth(0,.035,e-g.sea))*.7);
+  c=mix3(c,K_COLD,1-smooth(.2,.42,t));
   const h=heightFrac(e,g);
-  c=mix3(c,C_HILL,smooth(.45,.62,h)*.55);
-  c=mix3(c,C_ROCK,smooth(.7,.84,h));
-  c=mix3(c,C_SNOW,Math.max(smooth(.93,1.03,h),1-smooth(.05,.15,t)));
+  c=mix3(c,K_HILL,smooth(.45,.62,h)*.5);c=mix3(c,K_ROCK,smooth(.7,.86,h)*.6);
+  c=mix3(c,K_SNOW,Math.max(smooth(.93,1.03,h),1-smooth(.05,.15,t)));
   return c;
 }
-function seaColor(e,g){
-  const t=clamp((g.sea-e)/.16,0,1);
-  return t<.35?mix3([78,134,150],[38,86,114],t/.35):mix3([38,86,114],[14,38,64],(t-.35)/.65);
-}
+// the sea is a deep teal ink, lighter over the shelf
+function seaColor(e,g){const t=clamp((g.sea-e)/.16,0,1);return t<.3?mix3([62,88,86],[36,58,60],t/.3):mix3([36,58,60],[17,29,33],(t-.3)/.7)}
 function contour(E,w,h,lev){
   // marching squares → flat array of segments x0,y0,x1,y1 (sample coordinates)
   const out=[];
@@ -116,84 +114,90 @@ function paintTerrain(g,seed,nm){
   const img=bc.createImageData(PW,PH),d=img.data;
   for(let py=0;py<PH;py++)for(let px=0;px<PW;px++){
     const i=py*PW+px,e=Ep[i];let c;
-    if(e<g.sea){c=seaColor(e,g);const w=(vnoise(px*.09,py*.09,seed+5)-.5)*8;c=[c[0]+w,c[1]+w,c[2]+w*1.2]}
+    if(e<g.sea){c=seaColor(e,g);const w=(vnoise(px*.07,py*.07,seed+5)-.5)*7;c=[c[0]+w,c[1]+w,c[2]+w]}
     else{c=landColor(e,Mp[i],Tp[i],g);
+      // soft relief: light from the north-west, shadows lean toward umber rather than grey
       const ex=(px<PW-1?Ep[i+1]:e)-(px>0?Ep[i-1]:e),ey=(py<PH-1?Ep[i+PW]:e)-(py>0?Ep[i-PW]:e);
-      const h=heightFrac(e,g);const sh=clamp((ex+ey)*-22*(1+smooth(.5,.85,h)*1.6),-.42,.42);
-      c=[c[0]*(1+sh),c[1]*(1+sh),c[2]*(1+sh*1.05)];
-      if(e-g.sea<.0035)c=mix3(c,[210,194,150],.5);
+      const h=heightFrac(e,g);const sh=clamp((ex+ey)*-11*(.35+smooth(.4,.85,h)*1.6),-.3,.24);
+      c=sh<0?mix3(c,[118,92,66],-sh*.9):mix3(c,[244,234,212],sh*.8);
+      if(e-g.sea<.004)c=mix3(c,[230,216,182],.55);
     }
-    const gr=(hash2(px,py,seed+7)-.5)*7;
+    const gr=(hash2(px,py,seed+7)-.5)*6;
     d[i*4]=clamp(c[0]+gr,0,255);d[i*4+1]=clamp(c[1]+gr,0,255);d[i*4+2]=clamp(c[2]+gr,0,255);d[i*4+3]=255;
   }
   bc.putImageData(img,0,0);
-  // painted at 1.5x the layout resolution so zoomed views stay crisp; all drawing below uses layout units
-  const TS=1.5,cvs=document.createElement('canvas');cvs.width=RW*TS;cvs.height=RH*TS;const c=cvs.getContext('2d');c.setTransform(TS,0,0,TS,0,0);
+  // painted at twice the layout resolution so the engravings survive zooming; all drawing below uses layout units
+  const TS=2,cvs=document.createElement('canvas');cvs.width=RW*TS;cvs.height=RH*TS;const c=cvs.getContext('2d');c.setTransform(TS,0,0,TS,0,0);
   c.imageSmoothingEnabled=true;c.imageSmoothingQuality='high';c.drawImage(base,0,0,RW,RH);
   const sc=RW/PW;c.lineCap='round';c.lineJoin='round';
-  // depth contours and the inked shoreline
-  const lines=[[.03,.07,1],[.016,.1,1],[.007,.16,1.1]];
-  for(const[off,a,w]of lines){c.strokeStyle=`rgba(214,232,232,${a})`;c.lineWidth=w;strokeSegs(c,contour(Ep,PW,PH,g.sea-off),sc)}
+  // engraved water lines hugging the coast, fading out to sea
+  const ripples=[[.004,.5,.9],[.009,.36,.8],[.015,.25,.75],[.023,.17,.7],[.033,.11,.7],[.046,.07,.7]];
+  for(const[off,a,w]of ripples){c.strokeStyle=`rgba(226,208,170,${a})`;c.lineWidth=w;strokeSegs(c,contour(Ep,PW,PH,g.sea-off),sc)}
   const coast=contour(Ep,PW,PH,g.sea);
-  c.strokeStyle='rgba(240,232,206,.28)';c.lineWidth=3.2;strokeSegs(c,coast,sc);
-  c.strokeStyle='rgba(38,30,22,.85)';c.lineWidth=1.3;strokeSegs(c,coast,sc);
+  c.strokeStyle='rgba(12,18,20,.35)';c.lineWidth=3.4;strokeSegs(c,coast,sc);
+  c.strokeStyle='rgba(34,26,18,.95)';c.lineWidth=1.25;strokeSegs(c,coast,sc);
   // rivers, widening toward the sea
   for(const p of g.rivers){
     const pts=p.map(j=>[((j%W)+.5)*KR,(((j/W)|0)+.5)*KR]);
     for(let k=0;k<pts.length-1;k++){
       const a=k?[(pts[k-1][0]+pts[k][0])/2,(pts[k-1][1]+pts[k][1])/2]:pts[0],b=[(pts[k][0]+pts[k+1][0])/2,(pts[k][1]+pts[k+1][1])/2];
       c.beginPath();c.moveTo(a[0],a[1]);c.quadraticCurveTo(pts[k][0],pts[k][1],b[0],b[1]);
-      c.strokeStyle='rgba(40,82,112,.95)';c.lineWidth=.7+2.6*(k/pts.length);c.stroke();
+      c.strokeStyle='rgba(38,62,66,.92)';c.lineWidth=.6+2.2*(k/pts.length);c.stroke();
     }
   }
-  drawGlyphs(c,g,seed);
-  // paper grain and stains
+  drawStamps(c,g,seed);
+  // paper grain, foxing and a darkened rim
   const tile=document.createElement('canvas');tile.width=tile.height=256;const tc=tile.getContext('2d');const ti=tc.createImageData(256,256);
-  for(let i=0;i<256*256;i++){const v=128+(hash2(i%256,(i/256)|0,seed+77)-.5)*70;ti.data[i*4]=ti.data[i*4+1]=ti.data[i*4+2]=v;ti.data[i*4+3]=255}
+  for(let i=0;i<256*256;i++){const x=i%256,y=(i/256)|0;const v=128+(hash2(x,y,seed+77)-.5)*60+(vnoise(x*.35,y*.05,seed+78)-.5)*40;ti.data[i*4]=ti.data[i*4+1]=ti.data[i*4+2]=v;ti.data[i*4+3]=255}
   tc.putImageData(ti,0,0);
-  c.globalCompositeOperation='overlay';c.globalAlpha=.16;c.fillStyle=c.createPattern(tile,'repeat');c.fillRect(0,0,RW,RH);
+  c.globalCompositeOperation='overlay';c.globalAlpha=.2;c.fillStyle=c.createPattern(tile,'repeat');c.fillRect(0,0,RW,RH);
   const st=document.createElement('canvas');st.width=180;st.height=110;const sx=st.getContext('2d');const si=sx.createImageData(180,110);
-  for(let i=0;i<180*110;i++){const v=fbm((i%180)/22,((i/180)|0)/22,seed+91,4);const k=128+(v-.5)*120;si.data[i*4]=k;si.data[i*4+1]=k*.96;si.data[i*4+2]=k*.86;si.data[i*4+3]=255}
-  sx.putImageData(si,0,0);c.globalAlpha=.22;c.drawImage(st,0,0,RW,RH);
+  for(let i=0;i<180*110;i++){const v=fbm((i%180)/18,((i/180)|0)/18,seed+91,4);const k=128+(v-.5)*130;si.data[i*4]=k;si.data[i*4+1]=k*.95;si.data[i*4+2]=k*.84;si.data[i*4+3]=255}
+  sx.putImageData(si,0,0);c.globalAlpha=.26;c.drawImage(st,0,0,RW,RH);
   c.globalCompositeOperation='multiply';c.globalAlpha=1;
-  const vg=c.createRadialGradient(RW/2,RH/2,RH*.42,RW/2,RH/2,RW*.62);vg.addColorStop(0,'rgba(255,255,255,1)');vg.addColorStop(1,'rgba(150,140,120,1)');
+  const vg=c.createRadialGradient(RW/2,RH/2,RH*.45,RW/2,RH/2,RW*.64);vg.addColorStop(0,'rgba(255,255,255,1)');vg.addColorStop(1,'rgba(160,138,108,1)');
   c.fillStyle=vg;c.fillRect(0,0,RW,RH);
   c.globalCompositeOperation='source-over';
-  // graticule
-  c.strokeStyle='rgba(230,220,190,.07)';c.lineWidth=1;c.beginPath();
+  // graticule: hairlines every fifteen leagues, ticked along the edge
+  c.strokeStyle='rgba(60,44,28,.12)';c.lineWidth=.6;c.beginPath();
   for(let x=0;x<=W;x+=15){c.moveTo(x*KR,0);c.lineTo(x*KR,RH)}for(let y=0;y<=H;y+=15){c.moveTo(0,y*KR);c.lineTo(RW,y*KR)}c.stroke();
   g.canvas=cvs;
 }
 
-function drawGlyphs(c,g,seed){
-  const r=mulberry(seed^0x51ED27);const gl=[];
-  for(let y=0;y<H;y++)for(let x=0;x<W;x++){const i=y*W+x,b=g.biome[i];const px=(x+.5)*KR,py=(y+.5)*KR;
-    if(b===B.MOUNTAIN||b===B.PEAK){if(r()<.62)gl.push({t:'m',x:px+(r()-.5)*5,y:py+(r()-.5)*4,s:KR*(b===B.PEAK?2.1:1.5)*(.85+r()*.4),snow:b===B.PEAK||tempAt((y+.5)/H,g.elev[i],.5,g)<.2})}
-    else if(b===B.HILLS){if(r()<.32)gl.push({t:'h',x:px+(r()-.5)*5,y:py+(r()-.5)*5,s:KR*(.9+r()*.5)})}
-    else if(b===B.FOREST||b===B.JUNGLE||b===B.TAIGA){const n=b===B.JUNGLE?3:2;for(let k=0;k<n;k++)if(r()<.62)gl.push({t:b===B.TAIGA?'p':b===B.JUNGLE?'j':'f',x:px+(r()-.5)*KR,y:py+(r()-.5)*KR,s:KR*(.42+r()*.2)})}
-    else if(b===B.SWAMP){if(r()<.4)gl.push({t:'s',x:px+(r()-.5)*5,y:py+(r()-.5)*5,s:KR*.6})}
-    else if(b===B.DESERT){if(r()<.22)gl.push({t:'d',x:px+(r()-.5)*6,y:py+(r()-.5)*6,s:KR*(.8+r()*.5)})}
-  }
-  gl.sort((a,b)=>a.y-b.y);
-  const ink='rgba(38,30,22,.78)';
-  for(const o of gl){const{x,y,s}=o;
-    if(o.t==='m'){const h=s*.78;
-      c.beginPath();c.moveTo(x-s/2,y+h*.35);c.lineTo(x-s*.04,y-h*.65);c.lineTo(x+s/2,y+h*.35);c.closePath();c.fillStyle='rgba(150,138,122,.92)';c.fill();
-      c.beginPath();c.moveTo(x-s*.04,y-h*.65);c.lineTo(x+s/2,y+h*.35);c.lineTo(x+s*.08,y+h*.35);c.closePath();c.fillStyle='rgba(78,68,60,.75)';c.fill();
-      if(o.snow){c.beginPath();c.moveTo(x-s*.04,y-h*.65);c.lineTo(x-s*.2,y-h*.3);c.lineTo(x-s*.08,y-h*.36);c.lineTo(x+s*.02,y-h*.24);c.lineTo(x+s*.16,y-h*.34);c.closePath();c.fillStyle='rgba(246,246,242,.95)';c.fill()}
-      c.beginPath();c.moveTo(x-s/2,y+h*.35);c.lineTo(x-s*.04,y-h*.65);c.lineTo(x+s/2,y+h*.35);c.strokeStyle=ink;c.lineWidth=1.05;c.stroke();
-      c.beginPath();c.moveTo(x+s*.12,y-h*.3);c.lineTo(x+s*.3,y+h*.1);c.moveTo(x+s*.2,y-h*.42);c.lineTo(x+s*.38,y-h*.02);c.lineWidth=.6;c.stroke();
-    }else if(o.t==='h'){c.beginPath();c.moveTo(x-s/2,y+s*.15);c.quadraticCurveTo(x,y-s*.55,x+s/2,y+s*.15);c.strokeStyle=ink;c.lineWidth=.9;c.stroke();
-      c.beginPath();c.moveTo(x+s*.05,y-s*.18);c.quadraticCurveTo(x+s*.3,y-s*.05,x+s*.38,y+s*.1);c.strokeStyle='rgba(38,30,22,.35)';c.stroke();
-    }else if(o.t==='f'||o.t==='j'){const cr=o.t==='j'?[46,96,52]:[60,92,48];
-      c.beginPath();c.moveTo(x,y+s*.9);c.lineTo(x,y+s*.2);c.strokeStyle='rgba(60,44,30,.7)';c.lineWidth=.8;c.stroke();
-      c.beginPath();c.arc(x,y,s*.62,0,Math.PI*2);c.fillStyle=`rgb(${cr[0]},${cr[1]},${cr[2]})`;c.fill();
-      c.beginPath();c.arc(x-s*.18,y-s*.18,s*.3,0,Math.PI*2);c.fillStyle='rgba(170,200,120,.28)';c.fill();
-      c.beginPath();c.arc(x,y,s*.62,0,Math.PI*2);c.strokeStyle='rgba(30,40,22,.6)';c.lineWidth=.6;c.stroke();
-    }else if(o.t==='p'){c.beginPath();c.moveTo(x,y-s*.9);c.lineTo(x+s*.48,y+s*.55);c.lineTo(x-s*.48,y+s*.55);c.closePath();c.fillStyle='rgb(48,76,58)';c.fill();c.strokeStyle='rgba(22,32,24,.65)';c.lineWidth=.6;c.stroke();
-    }else if(o.t==='s'){c.strokeStyle='rgba(40,52,36,.7)';c.lineWidth=.7;c.beginPath();for(let k=-1;k<=1;k++){c.moveTo(x+k*s*.35,y+s*.3);c.lineTo(x+k*s*.42,y-s*.35)}c.moveTo(x-s*.6,y+s*.32);c.lineTo(x+s*.6,y+s*.32);c.stroke();
-    }else if(o.t==='d'){c.beginPath();c.moveTo(x-s/2,y);c.quadraticCurveTo(x,y-s*.35,x+s/2,y+s*.05);c.strokeStyle='rgba(140,108,60,.5)';c.lineWidth=.8;c.stroke()}
-  }
+/* Engraved stamps (Higgsfield-generated, see assets/) laid on a jittered lattice and sorted by depth,
+   so ranges and woods overlap the way they do on hand-drawn charts. */
+function drawStamps(c,g,seed){
+  const r=mulberry(seed^0x51ED27),st=ARTIMG.stamp,list=[];
+  const at=(x,y)=>{const cx=Math.floor(x/KR),cy=Math.floor(y/KR);return cx<0||cy<0||cx>=W||cy>=H?-1:g.biome[cy*W+cx]};
+  const scan=(step,fn)=>{let row=0;for(let y=step/2;y<RH;y+=step*.8,row++)for(let x=step/2+(row%2)*step/2;x<RW;x+=step){const px=x+(r()-.5)*step*.7,py=y+(r()-.5)*step*.5;const b=at(px,py);if(b>=0)fn(b,px,py)}};
+  scan(KR*1.55,(b,x,y)=>{
+    if(b===B.PEAK)list.push({k:r()<.05?'volcano':'peak',x,y,w:KR*(3.2+r()*.9)});
+    else if(b===B.MOUNTAIN&&r()<.8)list.push({k:r()<.6?'range':'peak',x,y,w:KR*(2.5+r()*.7)});
+  });
+  scan(KR*2.1,(b,x,y)=>{if(b===B.HILLS&&r()<.5)list.push({k:'hill',x,y,w:KR*(2+r()*.5)})});
+  scan(KR*1.45,(b,x,y)=>{
+    if(b===B.FOREST&&r()<.6)list.push({k:'forest',x,y,w:KR*(1.8+r()*.5)});
+    else if(b===B.TAIGA&&r()<.65)list.push({k:'pines',x,y,w:KR*(1.25+r()*.35)});
+    else if(b===B.JUNGLE&&r()<.62)list.push({k:'palms',x,y,w:KR*(1.45+r()*.35)});
+  });
+  list.sort((a,b)=>a.y-b.y);
+  for(const o of list){const im=st[o.k];if(!im)continue;const h=o.w*im.height/im.width;
+    c.save();c.translate(o.x,o.y);if(o.k!=='volcano'&&r()<.5)c.scale(-1,1);c.drawImage(im,-o.w/2,-h*.82,o.w,h);c.restore()}
+  // marsh reeds and dune strokes stay as quick pen work
+  c.strokeStyle='rgba(40,32,22,.6)';c.lineWidth=.6;c.beginPath();
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++){const b=g.biome[y*W+x],px=(x+.5)*KR,py=(y+.5)*KR;
+    if(b===B.SWAMP&&r()<.45){const s=KR*.55,qx=px+(r()-.5)*4,qy=py+(r()-.5)*4;for(let k=-1;k<=1;k++){c.moveTo(qx+k*s*.35,qy+s*.3);c.lineTo(qx+k*s*.45,qy-s*.35)}c.moveTo(qx-s*.6,qy+s*.32);c.lineTo(qx+s*.6,qy+s*.32)}
+    else if(b===B.DESERT&&r()<.22){const s=KR*(.8+r()*.5),qx=px+(r()-.5)*6,qy=py+(r()-.5)*6;c.moveTo(qx-s/2,qy);c.quadraticCurveTo(qx,qy-s*.35,qx+s/2,qy+s*.05)}}
+  c.stroke();
+}
+
+/* ---------- art: decode the packed images once ---------- */
+const ARTIMG={stamp:{},charge:{}};let compassImg=null;
+function loadArt(){
+  const L=src=>new Promise(res=>{const i=new Image();i.onload=()=>res(i);i.onerror=()=>res(null);i.src=src});const jobs=[];
+  for(const grp of['stamp','charge'])for(const k in ART[grp])jobs.push(L(ART[grp][k]).then(i=>{ARTIMG[grp][k]=i}));
+  jobs.push(L(ART.compass).then(i=>{compassImg=i}));
+  return Promise.all(jobs);
 }
 
 function genClouds(seed){
