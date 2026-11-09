@@ -27,7 +27,7 @@ function frame(now){
 }
 function showBanner(years,events){
   const el=$('#banner');
-  el.innerHTML=`<h3>${years} years passed while you were away</h3><p>${S.name} kept turning without you. These were its greatest moments:</p><div class="log">${events.slice(-7).reverse().map(e=>evEl(e,false).outerHTML).join('')||'<div class="empty">The years were quiet.</div>'}</div><button class="btn primary" type="button" id="bannerOk">Continue watching</button>`;
+  el.innerHTML=`<h3>${years} years passed while you were away</h3><p>${S.name} kept turning without you. These were its greatest moments:</p><div class="log">${events.slice(-7).reverse().map(e=>evEl(e,false).outerHTML).join('')||'<div class="empty">The years were quiet.</div>'}</div><button class="btn-line gold" type="button" id="bannerOk">Continue watching</button>`;
   el.hidden=false;$('#scrim').hidden=false;$('#bannerOk').onclick=()=>{el.hidden=true;$('#scrim').hidden=true};
 }
 function afterLoad(){
@@ -37,7 +37,7 @@ function afterLoad(){
   $('#loading').hidden=true;
 }
 function genesis(seed){
-  $('#loadingSub').textContent='Raising mountains…';$('#loading').hidden=false;$('#banner').hidden=true;
+  $('#loadingSub').textContent='raising mountains';$('#loading').hidden=false;$('#banner').hidden=true;
   setTimeout(()=>{newWorld(seed);afterLoad();save()},60);
 }
 function start(data){
@@ -48,7 +48,7 @@ function start(data){
     if(!ok)ok=loadSaved();
     if(ok){
       const away=(Date.now()-(S.saved||Date.now()))/60000;const seasons=Math.min(1000,Math.floor(away*8));
-      if(seasons>=12&&!(data&&data.save)){$('#loadingSub').textContent='Catching up on lost years…';
+      if(seasons>=12&&!(data&&data.save)){$('#loadingSub').textContent='catching up on the lost years';
         setTimeout(()=>{const y0=S.year;X.silent=true;for(let i=0;i<seasons;i++)stepSeason();X.silent=false;fresh=[];
           const ev=S.legends.filter(e=>e.y>y0&&e.i===2);afterLoad();showBanner(S.year-y0,ev);save();requestAnimationFrame(t=>{last=t;frame(t)})},30);return}
       afterLoad();

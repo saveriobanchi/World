@@ -24,47 +24,33 @@ Each world grows from a random seed: continents with ridged mountain chains, riv
 
 ## The interface
 
-The page is laid out like a Byzantine imperial codex on a cartographer's table. The painted chart fills the screen inside an engraver's neatline. Around it lie the instruments of a scriptorium:
+The painted chart fills the screen. A few quiet cards rest on it, each edged like a tarot card: a thin outer line, a finer inner line and a single star.
 
-- **The astrolabe** at the top is the clock of the world. Its needle sweeps through the four seasons, the brass button pauses time, and the crimson banner gives the season and the year, *Anno 412 · CDXII*. The Roman numerals beneath set the pace.
-- **The cartouche** carries the world's name in gold-leaf blackletter and the current age.
-- **Wax seals** (top right) open the Index (search), the follow camera, the music of the spheres, the settings and the codex.
-- **Layer medallions** (left) switch the map between realms, peoples, faiths, wars and armies, diplomacy, trade, knowledge, population and bare terrain. Each layer has a legend slip with heraldic-shield swatches.
-- **The codex** (right) is a leaf of purple-dyed vellum, bookmarked with five silk ribbons:
-  - *Chronicle:* years rubricated as *Anno* in red, legends opened with blackletter initials, ages marked by gilt titles.
-  - *Realms:* vassals nested under their overlords.
-  - *Figures:* rulers, armies, monsters, outlaws, heroes and great minds.
-  - *Ages:* a timeline of every realm.
-  - *Almanac:* the world's ledger and records.
-- **Detail pages** for every realm, city, army, war, beast and person are kept like ledgers, with dotted leaders rather than dashboard cards: arms and blazon, line of rulers, works, peoples, knowledge and diplomacy.
-- **The scroll** at the bottom, between its wooden rods, charts every realm's population through the centuries. **The inset map** beside it shows where you are looking.
-- **Heralds** unfurl a banner for each great event. The **Index** (`/` or Ctrl/Cmd+K) finds anything by name.
+- **The title** of the world is set directly on the map in widely spaced capitals, with the current age in italic beneath a gilt hairline.
+- **The clock** is a slim capsule. A moon waxes and wanes through the four seasons while a point of light travels its orbit. Beside it: *Anno 412 · autumn · CDXII*, the pause button, and the pace (½, 1, 2, 4, 8 seasons a second).
+- **Layers** hang on a hairline rail at the left: realms, peoples, faiths, wars, friends and foes, trade, knowledge, population and terrain. Each has a small legend card whose swatches are cut like banners.
+- **The codex** (right) holds five sections:
+  - *Chronicle:* a hairline timeline with a star at the turning of each year and a symbol for each deed, filtered by importance and by domain sigil.
+  - *Realms:* each with its banner, vassals nested beneath their overlords.
+  - *Figures*, *Ages* and the *Almanac*.
+- **Character sheets** open for every realm, city, army, war, beast and person:
+  - **Heading:** a hanging banner, the name in spaced capitals, the house line and the realm's tagline (*Unity. Valour. Mercy.*), and notched status tags.
+  - **The ruler's saying** as a quote.
+  - **Attribute bars** measured against the leading realm of the world: population, territory, treasury, military, stability and learning.
+  - **The rest:** the crown and its heirs, peoples, faith, knowledge, works, friends and foes, holdings, the line of rulers, and the chronicle.
+- **Heralds** announce great events, and the **Index** (`/` or Ctrl/Cmd+K) finds anything by name.
 - **Keyboard:** `Space` pause, `1`–`5` pace, `F` follow, `B` codex, `Esc` back.
 
 The world is saved in your browser and catches up while you are away (two years per minute, up to 250 years).
 
 ## Design system
 
-- **Materials.** Murex-purple vellum with a generated fibre texture, double gilt rules and engraved corner fleurons. Text is in gold and silver ink. Gold leaf is reserved for names: the world, ages, realms and the Index.
-- **Domains.** Every event belongs to a domain. Each domain has a medieval pigment and a planetary or alchemical sigil, drawn for the atlas:
-
-  | Sigil | Domain | Pigment |
-  |---|---|---|
-  | ♂ | War | vermilion |
-  | ♃ | Politics | gold leaf |
-  | ♀ | Society | rose madder |
-  | ☉ | Faith | lead white |
-  | ☿ | Trade | malachite |
-  | 🜃 | Nature | sap green |
-  | 🜂 | Calamity | orpiment |
-  | ☽ | Magic | orchil |
-  | ⚸ | Monsters | dragon's blood |
-  | 🜔 | Knowledge | lapis |
-  | ♄ | Death | bone black |
-
-  The same sigil and pigment mark an event in the chronicle, its filter, its herald banner and its ripple on the map.
-- **Symbols.** Engraved silhouettes from game-icons.net, used everywhere: inside enamel roundels in the chronicle, as seals and medallions in the controls, and as tokens on the map. The same collection supplies the heraldic charges.
-- **Letters.** Grenze Gotisch (blackletter) for names and titles, EB Garamond with old-style figures for the text, and Cormorant SC for rubrics and labels.
+- **Palette.** Warm ink and bone, one gold, and a thread of red. Realms fly banners in a curated set of muted inks (teal, oxblood, ochre, slate, olive, plum, rust, sage…) instead of a rainbow, so the map stays calm.
+- **Banners.** Each realm's banner hangs from a gilt rod and is cut to its people's fashion: pointed for humans, swallowtail for elves, square for dwarves, tattered for orcs, rounded for halflings. It carries the realm's emblem inside a thin orbit between two four-point stars. The same banner appears in lists, on character sheets, in hover cards and above each capital on the map.
+- **Domains.** Every event belongs to a domain with a muted ink and a planetary or alchemical sigil (♂ war, ♃ politics, ♀ society, ☉ faith, ☿ trade, 🜃 nature, 🜂 calamity, ☽ magic, ⚸ monsters, 🜔 knowledge, ♄ death). The same sign and colour mark an event in the chronicle, its filter, its herald and its ripple on the map.
+- **Ornament.** Hairlines, thin orbits, four-point stars, notched tags and tarot double borders, used sparingly.
+- **Letters.** Cormorant Garamond for names and text, in widely spaced capitals for titles and italic for subtitles. Jost for small capitals, labels and figures.
+- **Symbols.** Engraved silhouettes from game-icons.net, used for emblems, events, controls and map tokens alike.
 
 ## Building
 
@@ -72,6 +58,6 @@ The source lives in `src/`: `icons`, `core`, `data`, `terrain`, `heraldry`, `sim
 
 ## Credits
 
-- Symbols and heraldic charges: [game-icons.net](https://game-icons.net) by Lorc, Delapouite and contributors, [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/).
-- Fonts: Grenze Gotisch, EB Garamond and Cormorant SC from Google Fonts, SIL Open Font License.
-- Sigils, ornaments, the astrolabe, textures and terrain are drawn or generated by the atlas itself.
+- Emblems, symbols and heraldic charges: [game-icons.net](https://game-icons.net) by Lorc, Delapouite and contributors, [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/).
+- Fonts: Cormorant Garamond and Jost from Google Fonts, SIL Open Font License.
+- Banners, sigils, ornaments, the moon clock, textures and terrain are drawn or generated by the atlas itself.

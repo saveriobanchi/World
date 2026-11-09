@@ -25,7 +25,8 @@ function log(imp,cat,text,refs,x,y,extra){
 const Q=.25; // a season's share of a yearly chance
 
 /* ---------- realms, rulers, settlements ---------- */
-function realmColor(id){const h=(id*137.508+S.seed%360)%360,s=46+(id*7%3)*9,l=50+(id*11%3)*5;return{css:`hsl(${h.toFixed(1)} ${s}% ${l}%)`,rgb:hsl2rgb(h,s/100,l/100)}}
+function realmColor(id){const hex=BANNER_INKS[(id*7+(S.seed%5))%BANNER_INKS.length];const rgb=[1,3,5].map(i=>parseInt(hex.slice(i,i+2),16));return{css:hex,rgb}}
+function makeMotto(race){const w=shuffle(MOTTO_WORDS[race].slice()).slice(0,3);return w.join('. ')+'.'}
 function hsl2rgb(h,s,l){const k=n=>(n+h/30)%12,a=s*Math.min(l,1-l),f=n=>l-a*Math.max(-1,Math.min(k(n)-3,9-k(n),1));return[Math.round(f(0)*255),Math.round(f(8)*255),Math.round(f(4)*255)]}
 function realmName(r){return r.custom||GOV[r.race][r.tier][r.tmpl%GOV[r.race][r.tier].length].replace('{c}',r.core)}
 function makeRealm(race,o={}){
@@ -34,7 +35,7 @@ function makeRealm(race,o={}){
   const k={};for(const f of FK)k[f]=o.k?o.k[f]:0;
   const r={id,race,core:coreName(race),tier:o.tier??0,tmpl:ri(0,9),custom:o.custom||null,color:c.css,rgb:c.rgb,founded:S.year,alive:true,cap:-1,
     dynasty:placeName(race),k,tech:0,stab:60,faith:o.faith??S.raceFaith[race],golden:0,regnal:{},parent:o.parent??null,fell:null,peak:0,peakCells:0,
-    ruler:null,gold:o.gold??200,income:0,reigns:[],arms:makeArms(race,parent?parent.arms:null),overlord:null,vassalSince:null,law:LAWS[race]};
+    ruler:null,gold:o.gold??200,income:0,reigns:[],arms:makeArms(race,parent?parent.arms:null),overlord:null,vassalSince:null,law:LAWS[race],motto:makeMotto(race)};
   r.name=realmName(r);r.ruler=newRuler(r);S.realms.push(r);return r;
 }
 function newRuler(r,o={}){
@@ -150,8 +151,12 @@ function harvest(){
     if(h>1.3)bounty.set(r.id,(bounty.get(r.id)||0)+1);
     if(s.food<0){const loss=s.pop*Math.min(.3,-s.food*.35);s.pop-=loss;s.unrest=Math.min(1,s.unrest+.3);s.food=0;famine.set(r.id,(famine.get(r.id)||0)+loss);s.hungry=S.year}
   }
-  for(const[id,dead]of famine){const r=S.realms[id];r.stab-=Math.min(15,dead/800);if(dead>800){const ss=setsOf(id),c=ss.find(s=>s.hungry===S.year)||ss[0];
-    log(dead>6000?2:1,'famine',`Blighted fields and an empty autumn brought famine to ${rn(r)}. ${fmtDead(dead)} starved.`,['r'+id],c?c.x:null,c?c.y:null)}}
+  const hit=[];let total=0;
+  for(const[id,dead]of famine){const r=S.realms[id];r.stab-=Math.min(15,dead/800);if(dead>800){hit.push([r,dead]);total+=dead}}
+  hit.sort((a,b)=>b[1]-a[1]);
+  if(hit.length===1){const[r,dead]=hit[0],c=setsOf(r.id).find(s=>s.hungry===S.year);log(dead>6000?2:1,'famine',`Blighted fields and an empty autumn brought famine to ${rn(r)}. ${fmtDead(dead)} starved.`,['r'+r.id],c?c.x:null,c?c.y:null)}
+  else if(hit.length>1){const names=hit.slice(0,3).map(([r])=>rn(r));const more=hit.length-3;const c=setsOf(hit[0][0].id).find(s=>s.hungry===S.year);
+    log(total>12000?2:1,'famine',`A hungry autumn: famine stalked ${names.slice(0,-1).join(', ')}${more>0?', '+names[names.length-1]+` and ${more} other realm${more>1?'s':''}`:' and '+names[names.length-1]}. ${fmtDead(total)} starved.`,hit.map(([r])=>'r'+r.id),c?c.x:null,c?c.y:null)}
   for(const[id,n]of bounty){const r=S.realms[id];if(n>=4&&chance(.08)){r.stab=Math.min(100,r.stab+3);log(0,'harvest',`A bountiful harvest filled the granaries of ${rn(r)}.`,['r'+id])}}
 }
 function landUse(){
@@ -883,6 +888,7 @@ function restore(text){
   const o=JSON.parse(text);if(!o||o.v!==3||!Array.isArray(o.owner))return false;
   o.owner=Int16Array.from(o.owner);o.farm=Uint8Array.from(o.farm||[]);if(o.farm.length!==N)o.farm=new Uint8Array(N);S=o;G=genTerrain(S.seed);labelMasses(G);
   X.names=new Set([...S.sets.map(s=>s.name),...S.ruins.map(r=>r.name)]);
+  for(const r of S.realms){const c=realmColor(r.id);r.color=c.css;r.rgb=c.rgb;if(!r.motto)r.motto=makeMotto(r.race)}
   agg();computeBorders();scarMul();X.silent=true;buildNetworks();X.silent=false;farmDirty=true;return true;
 }
 function save(){try{S.saved=Date.now();localStorage.setItem(SAVE_KEY,serialize())}catch(e){}}

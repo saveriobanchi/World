@@ -2,103 +2,91 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Grenze+Gotisch:wght@500;600;700&family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=Cormorant+SC:wght@500;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=Jost:wght@400;500;600&display=swap">
 <style>/*@@CSS@@*/</style>
 
 <div class="app" id="app">
   <section class="mapwrap" id="mapwrap" aria-label="World map">
     <canvas id="map"></canvas>
+    <div class="veil top" aria-hidden="true"></div><div class="veil bottom" aria-hidden="true"></div>
     <div class="hovercard" id="tip" hidden></div>
   </section>
 
-  <!-- cartouche -->
-  <header class="cartouche" id="cartouche">
-    <div class="c-name" id="worldName">&nbsp;</div>
-    <div class="c-era"><span class="c-orn"></span><span id="eraName">&nbsp;</span><span class="c-orn"></span></div>
+  <header class="title">
+    <div class="t-name" id="worldName">&nbsp;</div>
+    <div class="t-rule" aria-hidden="true"><i></i><svg viewBox="0 0 12 12"><path d="M6 0Q6.9 5.1 12 6Q6.9 6.9 6 12Q5.1 6.9 0 6Q5.1 5.1 6 0Z"/></svg><i></i></div>
+    <div class="t-era" id="eraName">&nbsp;</div>
   </header>
 
-  <!-- astrolabe: the clock of the world -->
-  <div class="astro" role="group" aria-label="Time">
-    <svg class="astro-dial" viewBox="0 0 200 200" aria-hidden="true">
-      <defs>
-        <radialGradient id="brass" cx="38%" cy="30%" r="80%"><stop offset="0" stop-color="#f7dd97"/><stop offset=".45" stop-color="#c99a45"/><stop offset=".8" stop-color="#7d5a22"/><stop offset="1" stop-color="#4a3312"/></radialGradient>
-        <radialGradient id="tympan" cx="50%" cy="40%" r="70%"><stop offset="0" stop-color="#3a2340"/><stop offset="1" stop-color="#150c18"/></radialGradient>
-        <linearGradient id="needle" x1="0" x2="1"><stop offset="0" stop-color="#8c6b2c"/><stop offset=".5" stop-color="#f7dd97"/><stop offset="1" stop-color="#8c6b2c"/></linearGradient>
-      </defs>
-      <circle cx="100" cy="100" r="97" fill="url(#brass)"/>
-      <circle cx="100" cy="100" r="97" fill="none" stroke="#2a1c0b" stroke-width="1.5"/>
-      <g id="astroTicks"></g>
-      <circle cx="100" cy="100" r="78" fill="url(#tympan)" stroke="#2a1c0b" stroke-width="2"/>
-      <g id="astroSeasons"></g>
-      <g id="astroStars" opacity=".55"></g>
-      <g id="rete"><path d="M100 100 L100 30" stroke="url(#needle)" stroke-width="3" stroke-linecap="round"/><path d="M100 24 l5 9 -5 -3 -5 3z" fill="#f7dd97" stroke="#4a3312" stroke-width=".8"/><circle cx="100" cy="100" r="44" fill="none" stroke="#d9b25a" stroke-opacity=".35" stroke-dasharray="2 4"/></g>
+  <div class="clock card" role="group" aria-label="Time">
+    <svg class="moon" viewBox="0 0 60 60" aria-hidden="true">
+      <circle cx="30" cy="30" r="27" class="orbit"/>
+      <circle cx="30" cy="30" r="15" class="disc"/>
+      <path id="moonPhase" class="phase" d=""/>
+      <circle id="moonDot" cx="30" cy="3" r="2.4" class="dot"/>
     </svg>
-    <button class="astro-btn" id="playBtn" type="button" aria-label="Pause" data-tip="Pause or resume · Space"><svg class="i"><use id="playUse" href="#i-player-pause"/></svg></button>
-    <div class="astro-banner">
-      <span class="ab-season" id="seasonName">Spring</span>
-      <span class="ab-year">Anno <b id="year">0</b></span>
-      <span class="ab-roman" id="yearRoman"></span>
+    <div class="date">
+      <div class="d-year">Anno <b id="year">0</b></div>
+      <div class="d-sub"><span id="seasonName">Spring</span> · <span id="yearRoman"></span></div>
     </div>
-    <div class="astro-speed" id="speedSeg" role="group" aria-label="Seasons per second">
+    <button class="ring play" id="playBtn" type="button" aria-label="Pause" data-tip="Pause or resume · Space"><svg class="i"><use id="playUse" href="#i-player-pause"/></svg></button>
+    <div class="pace" id="speedSeg" role="group" aria-label="Seasons per second">
       <button type="button" data-s=".5" aria-pressed="false" data-tip="Half a season each second">½</button>
-      <button type="button" data-s="1" aria-pressed="true" data-tip="A season each second">I</button>
-      <button type="button" data-s="2" aria-pressed="false" data-tip="Two seasons each second">II</button>
-      <button type="button" data-s="4" aria-pressed="false" data-tip="A year each second">IV</button>
-      <button type="button" data-s="8" aria-pressed="false" data-tip="Two years each second">VIII</button>
+      <button type="button" data-s="1" aria-pressed="true" data-tip="A season each second">1</button>
+      <button type="button" data-s="2" aria-pressed="false" data-tip="Two seasons each second">2</button>
+      <button type="button" data-s="4" aria-pressed="false" data-tip="A year each second">4</button>
+      <button type="button" data-s="8" aria-pressed="false" data-tip="Two years each second">8</button>
     </div>
   </div>
 
-  <!-- seals -->
-  <div class="seals">
-    <button class="seal" type="button" id="searchBtn" data-tip="The index · /"><svg class="i"><use href="#i-search"/></svg></button>
-    <button class="seal" type="button" id="followBtn" aria-pressed="false" data-tip="Follow great events · F"><svg class="i"><use href="#i-focus-centered"/></svg></button>
-    <button class="seal" type="button" id="soundBtn" aria-pressed="false" data-tip="Music of the spheres"><svg class="i"><use id="soundUse" href="#i-volume-off"/></svg></button>
-    <button class="seal" type="button" id="settingsBtn" aria-expanded="false" data-tip="Settings"><svg class="i"><use href="#i-adjustments-horizontal"/></svg></button>
-    <button class="seal" type="button" id="sideBtn" data-tip="Open or close the codex · B"><svg class="i"><use id="sideUse" href="#i-layout-sidebar-right-collapse"/></svg></button>
+  <div class="tools">
+    <button class="ring" type="button" id="searchBtn" data-tip="Index · /"><svg class="i"><use href="#i-search"/></svg></button>
+    <button class="ring" type="button" id="followBtn" aria-pressed="false" data-tip="Follow great events · F"><svg class="i"><use href="#i-focus-centered"/></svg></button>
+    <button class="ring" type="button" id="soundBtn" aria-pressed="false" data-tip="Music"><svg class="i"><use id="soundUse" href="#i-volume-off"/></svg></button>
+    <button class="ring" type="button" id="settingsBtn" aria-expanded="false" data-tip="Settings"><svg class="i"><use href="#i-adjustments-horizontal"/></svg></button>
+    <button class="ring" type="button" id="sideBtn" data-tip="Codex · B"><svg class="i"><use id="sideUse" href="#i-layout-sidebar-right-collapse"/></svg></button>
   </div>
 
-  <div class="popover vellum" id="settings" hidden>
-    <div class="pop-title">The map</div>
-    <label class="lz"><input type="checkbox" id="optClouds" checked><span class="lz-box"></span><span>Drifting clouds</span></label>
-    <label class="lz"><input type="checkbox" id="optFarms" checked><span class="lz-box"></span><span>Fields &amp; farmland</span></label>
-    <div class="lz-row"><span>Names on the map</span><div class="txt-seg" id="optLabels"><button type="button" data-v="0">none</button><button type="button" data-v="1">few</button><button type="button" data-v="2" aria-pressed="true">all</button></div></div>
-    <div class="pop-title">The world</div>
-    <p class="pop-note" id="seedNote"></p>
-    <button class="btn-seal danger" type="button" id="newBtn"><svg class="i"><use href="#i-refresh"/></svg><span>Unmake this world &amp; begin anew</span></button>
-    <div class="pop-title">Keys</div>
-    <div class="keys"><span><kbd>Space</kbd> pause</span><span><kbd>1</kbd>–<kbd>5</kbd> pace</span><span><kbd>/</kbd> index</span><span><kbd>F</kbd> follow</span><span><kbd>B</kbd> codex</span><span><kbd>Esc</kbd> back</span></div>
+  <div class="popover card" id="settings" hidden>
+    <div class="label">The map</div>
+    <label class="opt"><span>Drifting clouds</span><input type="checkbox" id="optClouds" checked><i></i></label>
+    <label class="opt"><span>Fields &amp; farmland</span><input type="checkbox" id="optFarms" checked><i></i></label>
+    <div class="opt"><span>Names</span><div class="words" id="optLabels"><button type="button" data-v="0">none</button><button type="button" data-v="1">few</button><button type="button" data-v="2" aria-pressed="true">all</button></div></div>
+    <div class="label">The world</div>
+    <p class="note" id="seedNote"></p>
+    <button class="btn-line danger" type="button" id="newBtn"><span>Begin a new world</span></button>
+    <div class="label">Keys</div>
+    <div class="keys"><span><kbd>Space</kbd>pause</span><span><kbd>1–5</kbd>pace</span><span><kbd>/</kbd>index</span><span><kbd>F</kbd>follow</span><span><kbd>B</kbd>codex</span><span><kbd>Esc</kbd>back</span></div>
   </div>
 
-  <!-- layers -->
-  <nav class="medals" aria-label="Map layers" id="modeRail">
-    <button type="button" data-m="realms" aria-pressed="true" data-tip="Realms &amp; vassals"><svg class="i"><use href="#i-building-castle"/></svg></button>
+  <nav class="rail" aria-label="Map layers" id="modeRail">
+    <button type="button" data-m="realms" aria-pressed="true" data-tip="Realms"><svg class="i"><use href="#i-building-castle"/></svg></button>
     <button type="button" data-m="peoples" aria-pressed="false" data-tip="Peoples"><svg class="i"><use href="#i-users"/></svg></button>
     <button type="button" data-m="faith" aria-pressed="false" data-tip="Faiths"><svg class="i"><use href="#i-building-church"/></svg></button>
     <button type="button" data-m="military" aria-pressed="false" data-tip="Wars &amp; armies"><svg class="i"><use href="#i-swords"/></svg></button>
-    <button type="button" data-m="diplomacy" aria-pressed="false" data-tip="Friends &amp; foes of a realm"><svg class="i"><use href="#i-heart-handshake"/></svg></button>
-    <button type="button" data-m="trade" aria-pressed="false" data-tip="Trade &amp; resources"><svg class="i"><use href="#i-route"/></svg></button>
+    <button type="button" data-m="diplomacy" aria-pressed="false" data-tip="Friends &amp; foes"><svg class="i"><use href="#i-heart-handshake"/></svg></button>
+    <button type="button" data-m="trade" aria-pressed="false" data-tip="Trade"><svg class="i"><use href="#i-route"/></svg></button>
     <button type="button" data-m="knowledge" aria-pressed="false" data-tip="Knowledge"><svg class="i"><use href="#i-flask"/></svg></button>
-    <button type="button" data-m="density" aria-pressed="false" data-tip="Where people live"><svg class="i"><use href="#i-chart-dots"/></svg></button>
-    <button type="button" data-m="terrain" aria-pressed="false" data-tip="The bare land"><svg class="i"><use href="#i-mountain"/></svg></button>
-    <span class="fleuron" aria-hidden="true"></span>
-    <button type="button" id="zin" aria-label="Zoom in" data-tip="Draw nearer"><svg class="i"><use href="#i-plus"/></svg></button>
-    <button type="button" id="zout" aria-label="Zoom out" data-tip="Draw back"><svg class="i"><use href="#i-minus"/></svg></button>
-    <button type="button" id="zreset" aria-label="See the whole world" data-tip="The whole world"><svg class="i"><use href="#i-compass"/></svg></button>
+    <button type="button" data-m="density" aria-pressed="false" data-tip="Population"><svg class="i"><use href="#i-chart-dots"/></svg></button>
+    <button type="button" data-m="terrain" aria-pressed="false" data-tip="Terrain"><svg class="i"><use href="#i-mountain"/></svg></button>
+    <span class="node" aria-hidden="true"></span>
+    <button type="button" id="zin" aria-label="Zoom in" data-tip="Closer"><svg class="i"><use href="#i-plus"/></svg></button>
+    <button type="button" id="zout" aria-label="Zoom out" data-tip="Further"><svg class="i"><use href="#i-minus"/></svg></button>
+    <button type="button" id="zreset" aria-label="Whole world" data-tip="Whole world"><svg class="i"><use href="#i-compass"/></svg></button>
   </nav>
-  <aside class="legend vellum" id="legend" aria-live="polite"></aside>
+  <aside class="legend card" id="legend" aria-live="polite"></aside>
 
-  <!-- the codex -->
-  <aside class="codex vellum" id="side">
-    <nav class="ribbons" role="tablist" id="nav">
-      <button type="button" role="tab" data-tab="chronicle" aria-selected="true" style="--rb:#2f4f8f"><svg class="i"><use href="#i-list"/></svg><span>Chronicle</span></button>
-      <button type="button" role="tab" data-tab="realms" aria-selected="false" style="--rb:#9a3324"><svg class="i"><use href="#i-building-castle"/></svg><span>Realms</span></button>
-      <button type="button" role="tab" data-tab="figures" aria-selected="false" style="--rb:#2f6b4e"><svg class="i"><use href="#i-users-group"/></svg><span>Figures</span></button>
-      <button type="button" role="tab" data-tab="ages" aria-selected="false" style="--rb:#8a6a24"><svg class="i"><use href="#i-timeline"/></svg><span>Ages</span></button>
-      <button type="button" role="tab" data-tab="almanac" aria-selected="false" style="--rb:#5c3a78"><svg class="i"><use href="#i-trophy"/></svg><span>Almanac</span></button>
+  <aside class="codex card" id="side">
+    <nav class="tabs" role="tablist" id="nav">
+      <button type="button" role="tab" data-tab="chronicle" aria-selected="true">Chronicle</button>
+      <button type="button" role="tab" data-tab="realms" aria-selected="false">Realms</button>
+      <button type="button" role="tab" data-tab="figures" aria-selected="false">Figures</button>
+      <button type="button" role="tab" data-tab="ages" aria-selected="false">Ages</button>
+      <button type="button" role="tab" data-tab="almanac" aria-selected="false">Almanac</button>
     </nav>
     <div class="view" id="view-chronicle">
       <div class="filters">
-        <div class="txt-seg big" id="levelSeg" role="group" aria-label="Importance"><button type="button" data-l="0">every deed</button><button type="button" data-l="1" aria-pressed="true">the notable</button><button type="button" data-l="2">legends only</button></div>
+        <div class="words caps" id="levelSeg" role="group" aria-label="Importance"><button type="button" data-l="0">All</button><button type="button" data-l="1" aria-pressed="true">Notable</button><button type="button" data-l="2">Legends</button></div>
         <div class="sigils" id="domainChips"></div>
       </div>
       <div class="scroll" id="logScroll"><div class="log" id="log"></div></div>
@@ -108,33 +96,31 @@
     <div class="view scroll" id="view-ages" hidden><canvas id="ages"></canvas></div>
     <div class="view scroll" id="view-almanac" hidden></div>
     <div class="view" id="view-detail" hidden>
-      <div class="crumbs"><button type="button" class="back" id="backBtn"><svg class="i"><use href="#i-arrow-left"/></svg><span id="backLbl">Back</span></button><button type="button" class="seal sm" id="locateBtn" data-tip="Find it on the map"><svg class="i"><use href="#i-crosshair"/></svg></button></div>
+      <div class="crumbs"><button type="button" class="back" id="backBtn"><svg class="i"><use href="#i-arrow-left"/></svg><span id="backLbl">Back</span></button><button type="button" class="ring sm" id="locateBtn" data-tip="Find on the map"><svg class="i"><use href="#i-crosshair"/></svg></button></div>
       <div class="scroll detail" id="detail"></div>
     </div>
   </aside>
 
-  <!-- inset map & the scroll of years -->
   <section class="inset" aria-label="Inset map"><canvas id="minimap"></canvas></section>
-  <section class="scrollband" aria-label="Population through the years">
-    <span class="rod l" aria-hidden="true"></span><span class="rod r" aria-hidden="true"></span>
+  <section class="strip card" aria-label="Population through the years">
     <div class="kpis" id="kpis"></div>
     <div class="chart-box"><canvas id="chart"></canvas><div class="chart-tip" id="chartTip" hidden></div></div>
   </section>
 
   <div class="heralds" id="toasts" aria-live="polite"></div>
   <div class="scrim" id="scrim" hidden></div>
-  <div class="index vellum" id="palette" hidden role="dialog" aria-label="Index">
+  <div class="index card" id="palette" hidden role="dialog" aria-label="Index">
     <div class="idx-title">Index</div>
-    <div class="idx-in"><svg class="i"><use href="#i-search"/></svg><input id="palInput" type="text" placeholder="a realm, a city, a person, a beast…" autocomplete="off" spellcheck="false"><kbd>Esc</kbd></div>
+    <div class="idx-in"><svg class="i"><use href="#i-search"/></svg><input id="palInput" type="text" placeholder="a realm, a city, a person, a beast" autocomplete="off" spellcheck="false"><kbd>Esc</kbd></div>
     <div class="idx-res" id="palRes"></div>
   </div>
-  <div class="modal vellum" id="banner" hidden></div>
+  <div class="modal card" id="banner" hidden></div>
   <div class="loading" id="loading">
-    <svg class="load-astro" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="46" fill="none" stroke="#d9b25a" stroke-width="1.5"/><circle cx="50" cy="50" r="38" fill="none" stroke="#d9b25a" stroke-opacity=".4" stroke-dasharray="1 3"/><path d="M50 8 L54 46 L92 50 L54 54 L50 92 L46 54 L8 50 L46 46 Z" fill="#d9b25a"/><circle cx="50" cy="50" r="4" fill="#150c18"/></svg>
+    <svg class="load-star" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="44" fill="none" stroke="#cfa960" stroke-opacity=".35" stroke-width=".6"/><ellipse cx="50" cy="50" rx="44" ry="14" fill="none" stroke="#cfa960" stroke-opacity=".3" stroke-width=".6"/><path d="M50 22Q52.5 47.5 78 50Q52.5 52.5 50 78Q47.5 52.5 22 50Q47.5 47.5 50 22Z" fill="#cfa960"/></svg>
     <div class="load-title">The Living Atlas</div>
-    <div class="load-sub" id="loadingSub">Raising mountains…</div>
+    <div class="load-sub" id="loadingSub">raising mountains</div>
   </div>
-  <footer class="credit">Symbols &amp; heraldry <a href="https://game-icons.net" target="_blank" rel="noopener">game-icons.net</a> (CC BY 3.0) · Letters: Grenze Gotisch, EB Garamond, Cormorant SC (OFL)</footer>
+  <footer class="credit">Emblems &amp; symbols: <a href="https://game-icons.net" target="_blank" rel="noopener">game-icons.net</a> (CC BY 3.0) · Type: Cormorant Garamond &amp; Jost (OFL)</footer>
 </div>
 <div id="sprite" aria-hidden="true"></div>
 

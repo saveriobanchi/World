@@ -71,3 +71,33 @@ function armsImage(r){
   const img=new Image();img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(armsSVG(r.arms,64,'xmlns="http://www.w3.org/2000/svg"'));
   armsImg[r.id]={k,img};return null;
 }
+
+/* ---------- banners: each realm hangs a pennant cut to its people's fashion ---------- */
+const BANNER_CUT={
+  human:'M9 7H51V80L30 95L9 80Z',
+  elf:'M9 7H51V96L30 82L9 96Z',
+  dwarf:'M9 7H51V88H9Z',
+  orc:'M9 7H51V84L46 92L41 83L36 95L30 85L24 94L19 84L14 92L9 85Z',
+  halfling:'M9 7H51V78Q30 100 9 78Z',
+};
+const STAR4=(x,y,r)=>`M${x} ${y-r}Q${x+r*.18} ${y-r*.18} ${x+r} ${y}Q${x+r*.18} ${y+r*.18} ${x} ${y+r}Q${x-r*.18} ${y+r*.18} ${x-r} ${y}Q${x-r*.18} ${y-r*.18} ${x} ${y-r}Z`;
+function bannerSVG(r,w,extra=''){
+  if(!r||!r.arms)return'';
+  const cut=BANNER_CUT[r.race]||BANNER_CUT.human,id='bn'+Math.random().toString(36).slice(2,8);
+  const key=CHARGE_KEY[r.arms.c]||'c-'+r.arms.c,charge=CHARGES[key];
+  const ivory='#efe5d1',gold='#d6b26a';
+  return`<svg class="banner" ${extra} viewBox="0 0 60 100" width="${w}" height="${Math.round(w*100/60)}" aria-hidden="true"><defs><linearGradient id="${id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".16"/><stop offset=".55" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".38"/></linearGradient><clipPath id="${id}c"><path d="${cut}"/></clipPath></defs>
+    <path d="${cut}" fill="${r.color}"/><path d="${cut}" fill="url(#${id})"/>
+    <g clip-path="url(#${id}c)"><path d="${cut}" fill="none" stroke="${gold}" stroke-opacity=".55" stroke-width="1.4" transform="translate(30 50) scale(.84) translate(-30 -50)"/></g>
+    <circle cx="30" cy="40" r="15.5" fill="none" stroke="${ivory}" stroke-opacity=".35" stroke-width=".6"/>
+    ${charge?`<g transform="translate(17.5 27.5) scale(${25/512})"><path d="${charge}" fill="${ivory}"/></g>`:''}
+    <path d="${STAR4(30,19,2.4)}" fill="${gold}"/><path d="${STAR4(30,62,2)}" fill="${gold}"/><path d="M30 68v6" stroke="${gold}" stroke-opacity=".6" stroke-width=".6"/>
+    <rect x="4" y="4.6" width="52" height="2.4" rx="1.2" fill="${gold}"/><circle cx="4" cy="5.8" r="2.3" fill="${gold}"/><circle cx="56" cy="5.8" r="2.3" fill="${gold}"/></svg>`;
+}
+const bannerImg={};
+function bannerImage(r){
+  const k=r.id+':'+r.color+':'+JSON.stringify(r.arms);let e=bannerImg[r.id];
+  if(e&&e.k===k)return e.img.complete&&e.img.naturalWidth?e.img:null;
+  const img=new Image();img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(bannerSVG(r,60,'xmlns="http://www.w3.org/2000/svg"'));
+  bannerImg[r.id]={k,img};return null;
+}

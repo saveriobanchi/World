@@ -3,17 +3,17 @@
    ===================================================================== */
 // Every event belongs to a domain. Each domain has a medieval pigment and a planetary or alchemical sigil.
 const DOMAIN={
-  war:{n:'War',c:'#e8603f',p:'vermilion',sig:'M10 14m-5 0a5 5 0 1 0 10 0a5 5 0 1 0-10 0M13.6 10.4L20 4M14.5 4H20V9.5'},
-  politics:{n:'Politics',c:'#e6b85c',p:'gold leaf',sig:'M5 9c0-4 7-5 7.5-.5C13 12 5 16 5 16h14M15.5 4v16'},
-  people:{n:'Society',c:'#e88fa6',p:'rose madder',sig:'M12 9m-5 0a5 5 0 1 0 10 0a5 5 0 1 0-10 0M12 14v7M8.5 17.5h7'},
-  faith:{n:'Faith',c:'#efe3c4',p:'lead white',sig:'M12 12m-8 0a8 8 0 1 0 16 0a8 8 0 1 0-16 0M12 12m-1.4 0a1.4 1.4 0 1 0 2.8 0a1.4 1.4 0 1 0-2.8 0'},
-  economy:{n:'Trade',c:'#5cbf93',p:'malachite',sig:'M8 2.5c0 3.2 8 3.2 8 0M12 10m-4 0a4 4 0 1 0 8 0a4 4 0 1 0-8 0M12 14v7M8.5 17.5h7'},
-  nature:{n:'Nature',c:'#a3c76c',p:'sap green',sig:'M4 5h16L12 20ZM7.2 10.5h9.6'},
-  disaster:{n:'Calamity',c:'#f29c43',p:'orpiment',sig:'M12 4L20.5 19.5h-17Z'},
-  magic:{n:'Magic',c:'#c7a2f4',p:'orchil',sig:'M15 3.5a8.5 8.5 0 1 0 0 17a7 7 0 1 1 0-17Z'},
-  monster:{n:'Monsters',c:'#d6455b',p:'dragon’s blood',sig:'M14 2.5a6 6 0 1 0 0 11a4.8 4.8 0 1 1 0-11ZM10.5 13.5v8M7 18h7'},
-  knowledge:{n:'Knowledge',c:'#78a3ee',p:'lapis',sig:'M12 12m-7.5 0a7.5 7.5 0 1 0 15 0a7.5 7.5 0 1 0-15 0M4.5 12h15'},
-  death:{n:'Death',c:'#aaa29c',p:'bone black',sig:'M7 4.5h7M10.5 2v13c0-4.5 7-4.5 7 .5c0 3-3 3.5-3 6'},
+  war:{n:'War',c:'#c8574a',p:'vermilion',sig:'M10 14m-5 0a5 5 0 1 0 10 0a5 5 0 1 0-10 0M13.6 10.4L20 4M14.5 4H20V9.5'},
+  politics:{n:'Politics',c:'#cfa960',p:'gold leaf',sig:'M5 9c0-4 7-5 7.5-.5C13 12 5 16 5 16h14M15.5 4v16'},
+  people:{n:'Society',c:'#c99191',p:'rose madder',sig:'M12 9m-5 0a5 5 0 1 0 10 0a5 5 0 1 0-10 0M12 14v7M8.5 17.5h7'},
+  faith:{n:'Faith',c:'#e6dcc8',p:'lead white',sig:'M12 12m-8 0a8 8 0 1 0 16 0a8 8 0 1 0-16 0M12 12m-1.4 0a1.4 1.4 0 1 0 2.8 0a1.4 1.4 0 1 0-2.8 0'},
+  economy:{n:'Trade',c:'#79a891',p:'malachite',sig:'M8 2.5c0 3.2 8 3.2 8 0M12 10m-4 0a4 4 0 1 0 8 0a4 4 0 1 0-8 0M12 14v7M8.5 17.5h7'},
+  nature:{n:'Nature',c:'#9aa868',p:'sap green',sig:'M4 5h16L12 20ZM7.2 10.5h9.6'},
+  disaster:{n:'Calamity',c:'#d28e43',p:'orpiment',sig:'M12 4L20.5 19.5h-17Z'},
+  magic:{n:'Magic',c:'#a99ccc',p:'orchil',sig:'M15 3.5a8.5 8.5 0 1 0 0 17a7 7 0 1 1 0-17Z'},
+  monster:{n:'Monsters',c:'#b9475a',p:'dragon’s blood',sig:'M14 2.5a6 6 0 1 0 0 11a4.8 4.8 0 1 1 0-11ZM10.5 13.5v8M7 18h7'},
+  knowledge:{n:'Knowledge',c:'#86a3c4',p:'lapis',sig:'M12 12m-7.5 0a7.5 7.5 0 1 0 15 0a7.5 7.5 0 1 0-15 0M4.5 12h15'},
+  death:{n:'Death',c:'#958c80',p:'bone black',sig:'M7 4.5h7M10.5 2v13c0-4.5 7-4.5 7 .5c0 3-3 3.5-3 6'},
 };
 const DOMAIN_KEYS=Object.keys(DOMAIN);
 const CAT={
@@ -80,3 +80,17 @@ const GREAT={
 const BANDIT_N=['the Red Hand','the Crows','the Grey Wolves','the Brotherhood of Ash','the Laughing Knives','the Hollow Men','the Black Boar Company','the Free Spears','the Thornback Riders'];
 const PIRATE_N=['the Salt Reavers','the Kraken’s Teeth','the Black Gulls','the Drowned Crown','the Tide Wolves','the Brine Sisters','the Red Sails'];
 const FESTIVALS=['a midsummer fair','the Feast of Lanterns','a great tourney','the harvest games','a wedding feast that lasted a fortnight','the Night of Masks'];
+
+// Each realm hangs its banner in one of these inks, chosen so neighbours rarely share a colour.
+const BANNER_INKS=['#2f5568','#8c3a32','#b98a3a','#3e4b6e','#5d6b3e','#6c4061','#a2582f','#3f6e5d','#7b6a3c','#2c3f57','#9b6b4d','#55707f','#7e3348','#4f7d6d','#b27a3f','#5b4a70','#486343','#8a4f3a'];
+const MOTTO_WORDS={
+  human:['Honour','Crown','Steel','Faith','Law','Valour','Duty','Glory','Unity','Mercy'],
+  elf:['Grace','Memory','Starlight','Patience','Song','Wisdom','Balance','Silence','Dawn'],
+  dwarf:['Stone','Oath','Forge','Kin','Endurance','Craft','Gold','Iron','Deep'],
+  orc:['Blood','Strength','Fury','Survival','Instinct','Conquest','Fire','Power','Hunger'],
+  halfling:['Hearth','Harvest','Kinship','Comfort','Luck','Peace','Bread','Home','Rain'],
+};
+const SAYINGS={Wise:'Patience builds what haste destroys.',Just:'The law weighs the king as it weighs the beggar.',Cruel:'Fear is a crown that never slips.',
+  Ambitious:'Every border is only a beginning.',Brave:'I ride at the front, or not at all.',Craven:'A living coward rules longer than a dead hero.',
+  Pious:'The heavens keep the true ledger.',Scholar:'Ink outlasts every sword.',Mad:'The stars whisper, and I alone listen.',Greedy:'Gold remembers who held it.',
+  Gentle:'A kingdom is a garden, not a forge.',Builder:'Let the stones remember us.',Seafarer:'The sea is a road with no masters.'};
