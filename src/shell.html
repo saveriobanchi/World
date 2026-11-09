@@ -2,84 +2,131 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Uncial+Antiqua&family=Cormorant+SC:wght@500;600;700&family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Alegreya+Sans:ital,wght@0,400;0,500;0,700;1,400&family=Alegreya+Sans+SC:wght@500;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500;1,9..144,600&family=Manrope:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500&display=swap">
 <style>/*@@CSS@@*/</style>
 
 <div class="app" id="app">
   <section class="mapwrap" id="mapwrap" aria-label="World map">
     <canvas id="map"></canvas>
-    <div class="tip" id="tip" hidden></div>
-    <div class="loading" id="loading"><div class="loading-in"><div class="loading-title">The Living Atlas</div><div class="loading-sub" id="loadingSub">Raising mountains&hellip;</div></div></div>
+    <div class="hovercard" id="tip" hidden></div>
   </section>
 
-  <header class="hud hud-top">
-    <div class="panel cartouche">
-      <div class="world" id="worldName">&nbsp;</div>
-      <div class="era" id="eraName">&nbsp;</div>
-    </div>
-    <div class="panel dial">
-      <button class="play" id="playBtn" type="button" aria-label="Pause"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path id="playIcon" d="M7 5h3v14H7zM14 5h3v14h-3z"/></svg></button>
-      <div class="yearbox"><span class="yr-lbl">Year</span><span class="yr" id="year">0</span></div>
-      <div class="seg" role="group" aria-label="Years per second" id="speedSeg">
-        <button type="button" data-s="1" aria-pressed="false">1&times;</button>
-        <button type="button" data-s="3" aria-pressed="true">3&times;</button>
-        <button type="button" data-s="10" aria-pressed="false">10&times;</button>
-        <button type="button" data-s="30" aria-pressed="false">30&times;</button>
+  <!-- top bar -->
+  <header class="topbar">
+    <div class="brand glass">
+      <svg class="emblem" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="18.5" fill="none" stroke="currentColor" stroke-opacity=".35"/><path d="M20 3 L23 17 L37 20 L23 23 L20 37 L17 23 L3 20 L17 17 Z" fill="currentColor"/><circle cx="20" cy="20" r="3.2" fill="#0d1018"/></svg>
+      <div class="brand-txt">
+        <div class="world" id="worldName">&nbsp;</div>
+        <div class="era"><svg class="i"><use href="#i-hourglass"/></svg><span id="eraName">&nbsp;</span></div>
       </div>
     </div>
-    <div class="panel tools">
-      <button class="tool" type="button" id="followBtn" aria-pressed="false" title="Fly the camera to great events"><svg><use href="#i-camera"/></svg><span>Follow</span></button>
-      <button class="tool" type="button" id="cloudBtn" aria-pressed="true" title="Show drifting clouds"><svg viewBox="0 0 24 24"><path d="M7 18h10a4 4 0 0 0 .6-7.96A6 6 0 0 0 6.1 9.2 4.5 4.5 0 0 0 7 18z" fill="currentColor"/></svg><span>Clouds</span></button>
-      <button class="tool" type="button" id="soundBtn" aria-pressed="false" title="Play the generative soundtrack"><svg><use href="#i-sound"/></svg><span>Music</span></button>
-      <button class="tool" type="button" id="newBtn" title="Roll a new world"><svg><use href="#i-comet"/></svg><span>New world</span></button>
+    <div class="capsule glass" role="group" aria-label="Time">
+      <div class="when">
+        <span class="season-ico" id="seasonIco"><svg class="i"><use href="#i-seedling"/></svg></span>
+        <div class="date"><span class="season" id="seasonName">Spring</span><span class="yr">Year <b id="year">0</b></span></div>
+      </div>
+      <button class="play" id="playBtn" type="button" aria-label="Pause" data-tip="Pause or resume  ·  Space"><svg class="i"><use id="playUse" href="#i-player-pause"/></svg></button>
+      <div class="speeds" id="speedSeg" role="group" aria-label="Seasons per second">
+        <button type="button" data-s=".5" aria-pressed="false" data-tip="Half a season per second">½×</button>
+        <button type="button" data-s="1" aria-pressed="true" data-tip="One season per second">1×</button>
+        <button type="button" data-s="2" aria-pressed="false" data-tip="Two seasons per second">2×</button>
+        <button type="button" data-s="4" aria-pressed="false" data-tip="A year per second">4×</button>
+        <button type="button" data-s="8" aria-pressed="false" data-tip="Two years per second">8×</button>
+      </div>
+      <div class="season-bar"><i id="seasonBar"></i></div>
+    </div>
+    <div class="tools glass">
+      <button class="tool" type="button" id="searchBtn" data-tip="Search the world  ·  /"><svg class="i"><use href="#i-search"/></svg></button>
+      <button class="tool" type="button" id="followBtn" aria-pressed="false" data-tip="Follow great events with the camera  ·  F"><svg class="i"><use href="#i-focus-centered"/></svg></button>
+      <button class="tool" type="button" id="soundBtn" aria-pressed="false" data-tip="Generative soundtrack"><svg class="i"><use id="soundUse" href="#i-volume-off"/></svg></button>
+      <button class="tool" type="button" id="settingsBtn" aria-expanded="false" data-tip="Display &amp; world settings"><svg class="i"><use href="#i-adjustments-horizontal"/></svg></button>
+      <button class="tool" type="button" id="sideBtn" data-tip="Show or hide the codex  ·  B"><svg class="i"><use id="sideUse" href="#i-layout-sidebar-right-collapse"/></svg></button>
     </div>
   </header>
-  <div class="stats" id="stats"></div>
 
-  <nav class="hud modes panel" aria-label="Map mode" id="modeRail">
-    <button type="button" data-m="realms" aria-pressed="true"><svg><use href="#i-castle"/></svg><span>Realms</span></button>
-    <button type="button" data-m="peoples" aria-pressed="false"><svg><use href="#i-people"/></svg><span>Peoples</span></button>
-    <button type="button" data-m="faith" aria-pressed="false"><svg><use href="#i-faith"/></svg><span>Faiths</span></button>
-    <button type="button" data-m="trade" aria-pressed="false"><svg><use href="#i-trade"/></svg><span>Trade</span></button>
-    <button type="button" data-m="density" aria-pressed="false"><svg><use href="#i-found"/></svg><span>Population</span></button>
-    <button type="button" data-m="diplomacy" aria-pressed="false"><svg><use href="#i-ally"/></svg><span>Diplomacy</span></button>
-    <button type="button" data-m="terrain" aria-pressed="false"><svg><use href="#i-explorer"/></svg><span>Terrain</span></button>
-    <div class="zoom"><button type="button" id="zin" aria-label="Zoom in">+</button><button type="button" id="zout" aria-label="Zoom out">&minus;</button><button type="button" id="zreset" aria-label="Fit map">&#9675;</button></div>
+  <!-- settings popover -->
+  <div class="popover glass" id="settings" hidden>
+    <div class="pop-title">Display</div>
+    <label class="row-toggle"><span><svg class="i"><use href="#i-cloud"/></svg>Drifting clouds</span><input type="checkbox" id="optClouds" checked></label>
+    <label class="row-toggle"><span><svg class="i"><use href="#i-wheat"/></svg>Farmland</span><input type="checkbox" id="optFarms" checked></label>
+    <div class="row-toggle"><span><svg class="i"><use href="#i-map-pin"/></svg>Labels</span>
+      <div class="mini-seg" id="optLabels"><button type="button" data-v="0">Off</button><button type="button" data-v="1">Few</button><button type="button" data-v="2" aria-pressed="true">All</button></div></div>
+    <div class="pop-title">World</div>
+    <div class="pop-note" id="seedNote"></div>
+    <button class="btn danger" type="button" id="newBtn"><svg class="i"><use href="#i-refresh"/></svg><span>Roll a new world</span></button>
+    <div class="pop-title">Keyboard</div>
+    <div class="keys"><span><kbd>Space</kbd> play / pause</span><span><kbd>1</kbd>–<kbd>5</kbd> speed</span><span><kbd>/</kbd> search</span><span><kbd>F</kbd> follow</span><span><kbd>B</kbd> codex</span><span><kbd>Esc</kbd> back</span></div>
+  </div>
+
+  <!-- layers -->
+  <nav class="dock glass" aria-label="Map layers" id="modeRail">
+    <button type="button" data-m="realms" aria-pressed="true" data-tip="Realms &amp; vassals"><svg class="i"><use href="#i-building-castle"/></svg></button>
+    <button type="button" data-m="peoples" aria-pressed="false" data-tip="Peoples"><svg class="i"><use href="#i-users"/></svg></button>
+    <button type="button" data-m="faith" aria-pressed="false" data-tip="Faiths"><svg class="i"><use href="#i-building-church"/></svg></button>
+    <button type="button" data-m="military" aria-pressed="false" data-tip="Wars &amp; armies"><svg class="i"><use href="#i-swords"/></svg></button>
+    <button type="button" data-m="diplomacy" aria-pressed="false" data-tip="Diplomacy of the selected realm"><svg class="i"><use href="#i-heart-handshake"/></svg></button>
+    <button type="button" data-m="trade" aria-pressed="false" data-tip="Trade &amp; resources"><svg class="i"><use href="#i-route"/></svg></button>
+    <button type="button" data-m="knowledge" aria-pressed="false" data-tip="Knowledge"><svg class="i"><use href="#i-flask"/></svg></button>
+    <button type="button" data-m="density" aria-pressed="false" data-tip="Population density"><svg class="i"><use href="#i-chart-dots"/></svg></button>
+    <button type="button" data-m="terrain" aria-pressed="false" data-tip="Bare terrain"><svg class="i"><use href="#i-mountain"/></svg></button>
+    <span class="dock-sep"></span>
+    <button type="button" id="zin" aria-label="Zoom in" data-tip="Zoom in"><svg class="i"><use href="#i-plus"/></svg></button>
+    <button type="button" id="zout" aria-label="Zoom out" data-tip="Zoom out"><svg class="i"><use href="#i-minus"/></svg></button>
+    <button type="button" id="zreset" aria-label="Fit the world" data-tip="Fit the world"><svg class="i"><use href="#i-world"/></svg></button>
   </nav>
-  <div class="mode-hint" id="modeHint" hidden></div>
+  <aside class="legend glass" id="legend" aria-live="polite"></aside>
 
-  <aside class="hud drawer panel" id="drawer">
-    <div class="tabs" role="tablist">
-      <button type="button" role="tab" aria-selected="true" data-tab="chronicle">Chronicle</button>
-      <button type="button" role="tab" aria-selected="false" data-tab="realms">Realms</button>
-      <button type="button" role="tab" aria-selected="false" data-tab="figures">Figures</button>
-      <button type="button" role="tab" aria-selected="false" data-tab="ages">Ages</button>
-      <button type="button" role="tab" aria-selected="false" data-tab="inspect">Inspect</button>
-    </div>
-    <div class="pane" id="pane-chronicle" role="tabpanel">
-      <div class="pane-head">
-        <label for="logFilter">Show</label>
-        <select id="logFilter"><option value="0">Every event</option><option value="1" selected>Notable events</option><option value="2">Legends only</option></select>
+  <!-- codex -->
+  <aside class="side glass" id="side">
+    <nav class="nav" role="tablist" id="nav">
+      <button type="button" role="tab" data-tab="chronicle" aria-selected="true"><svg class="i"><use href="#i-list"/></svg><span>Chronicle</span></button>
+      <button type="button" role="tab" data-tab="realms" aria-selected="false"><svg class="i"><use href="#i-building-castle"/></svg><span>Realms</span></button>
+      <button type="button" role="tab" data-tab="figures" aria-selected="false"><svg class="i"><use href="#i-users-group"/></svg><span>Figures</span></button>
+      <button type="button" role="tab" data-tab="ages" aria-selected="false"><svg class="i"><use href="#i-timeline"/></svg><span>Ages</span></button>
+      <button type="button" role="tab" data-tab="almanac" aria-selected="false"><svg class="i"><use href="#i-trophy"/></svg><span>Almanac</span></button>
+    </nav>
+    <div class="view" id="view-chronicle">
+      <div class="filters">
+        <div class="seg" id="levelSeg" role="group" aria-label="Importance">
+          <button type="button" data-l="0">All</button><button type="button" data-l="1" aria-pressed="true">Notable</button><button type="button" data-l="2">Legends</button>
+        </div>
+        <div class="domains" id="domainChips"></div>
       </div>
-      <ul class="log" id="log"></ul>
+      <div class="scroll" id="logScroll"><div class="log" id="log"></div></div>
     </div>
-    <div class="pane" id="pane-realms" role="tabpanel" hidden></div>
-    <div class="pane" id="pane-figures" role="tabpanel" hidden></div>
-    <div class="pane" id="pane-ages" role="tabpanel" hidden><canvas id="ages"></canvas></div>
-    <div class="pane detail" id="pane-inspect" role="tabpanel" hidden></div>
+    <div class="view scroll" id="view-realms" hidden></div>
+    <div class="view scroll" id="view-figures" hidden></div>
+    <div class="view scroll" id="view-ages" hidden><canvas id="ages"></canvas></div>
+    <div class="view scroll" id="view-almanac" hidden></div>
+    <div class="view" id="view-detail" hidden>
+      <div class="crumbs"><button type="button" class="back" id="backBtn"><svg class="i"><use href="#i-arrow-left"/></svg><span id="backLbl">Back</span></button><button type="button" class="tool sm" id="locateBtn" data-tip="Show on the map"><svg class="i"><use href="#i-crosshair"/></svg></button></div>
+      <div class="scroll detail" id="detail"></div>
+    </div>
   </aside>
 
-  <section class="hud strip panel" aria-label="Population by realm over time">
-    <canvas id="chart"></canvas>
-    <div class="chart-cap">Population by realm</div>
-    <div class="chart-tip" id="chartTip" hidden></div>
+  <!-- bottom -->
+  <section class="mini glass" aria-label="Minimap"><canvas id="minimap"></canvas></section>
+  <section class="strip glass" aria-label="World statistics">
+    <div class="kpis" id="kpis"></div>
+    <div class="chart-box"><canvas id="chart"></canvas><div class="chart-tip" id="chartTip" hidden></div></div>
   </section>
 
   <div class="toasts" id="toasts" aria-live="polite"></div>
-  <div class="banner panel" id="banner" hidden></div>
-  <footer class="credit">Icons: <a href="https://game-icons.net" target="_blank" rel="noopener">game-icons.net</a> by Lorc, Delapouite &amp; contributors, CC BY 3.0 &middot; Fonts: Google Fonts (OFL)</footer>
+  <div class="scrim" id="scrim" hidden></div>
+  <div class="palette glass" id="palette" hidden role="dialog" aria-label="Search">
+    <div class="pal-in"><svg class="i"><use href="#i-search"/></svg><input id="palInput" type="text" placeholder="Search realms, cities, people, monsters…" autocomplete="off" spellcheck="false"><kbd>Esc</kbd></div>
+    <div class="pal-res" id="palRes"></div>
+  </div>
+  <div class="modal glass" id="banner" hidden></div>
+  <div class="loading" id="loading">
+    <svg class="emblem big" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="18.5" fill="none" stroke="currentColor" stroke-opacity=".35"/><path d="M20 3 L23 17 L37 20 L23 23 L20 37 L17 23 L3 20 L17 17 Z" fill="currentColor"/><circle cx="20" cy="20" r="3.2" fill="#0d1018"/></svg>
+    <div class="load-title">The Living Atlas</div>
+    <div class="load-bar"><i></i></div>
+    <div class="load-sub" id="loadingSub">Raising mountains…</div>
+  </div>
+  <footer class="credit">Symbols <a href="https://tabler.io/icons" target="_blank" rel="noopener">Tabler Icons</a> (MIT) · Heraldic charges <a href="https://game-icons.net" target="_blank" rel="noopener">game-icons.net</a> (CC BY 3.0) · Type: Fraunces, Manrope, Geist Mono (OFL)</footer>
 </div>
-<div id="sprite" hidden></div>
+<div id="sprite" aria-hidden="true"></div>
 
 <script>
 /*@@JS@@*/

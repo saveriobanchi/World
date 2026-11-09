@@ -5,7 +5,7 @@
 const W=180,H=110,N=W*H;          // simulation grid
 const K=4,PW=W*K,PH=H*K;          // terrain sampling resolution
 const KR=8,RW=W*KR,RH=H*KR;       // painted map resolution
-const SAVE_KEY='living-atlas-v2';
+const SAVE_KEY='living-atlas-v3';
 const $=s=>document.querySelector(s);
 const $$=s=>Array.from(document.querySelectorAll(s));
 const clamp=(v,a,b)=>v<a?a:v>b?b:v;
@@ -106,15 +106,6 @@ const TITLES={
 };
 const TRAITS={Wise:{st:1},Just:{st:1,ag:-.1,rel:4},Cruel:{st:-1,ag:.2,rel:-8},Ambitious:{ag:.25},Brave:{ag:.1},Craven:{ag:-.2},Pious:{pi:1},Scholar:{te:1},Mad:{st:-1.5,ag:.3},Greedy:{st:-.5,go:1},Gentle:{ag:-.25,st:.5,rel:6},Builder:{wo:1},Seafarer:{se:1}};
 const TRAIT_KEYS=Object.keys(TRAITS);
-const TECH=['bronze tools','iron smelting','written law','steel forging','runecraft','the arcane lattice','clockwork engines','aether sails'];
-const TECH_AGE=['Bronze','Iron','Law','Steel','Runes','Arcana','Clockwork','Aether'];
-const GREAT={
-  scholar:{n:'Scholar',w:['the Codex of {a}','On the Nature of {a}','the Book of {a}','the {a} Treatise'],ico:'scholar'},
-  artist:{n:'Artist',w:['the Fresco of {a}','the Lament for {a}','the Ballad of {a}','the {a} Tapestry'],ico:'artist'},
-  general:{n:'General',w:[],ico:'general'},
-  explorer:{n:'Explorer',w:[],ico:'explorer'},
-  mage:{n:'Archmage',w:['the Grimoire of {a}','the {a} Incantations'],ico:'mage'},
-};
 const WORK_A=['Seven Winds','the Drowned Stars','Silver Rain','the First Kings','Ash and Iron','the Long Road','Hidden Fire','Quiet Waters','the Thousand Doors','Falling Leaves','the Last Summer','Glass Mountains'];
 
 /* ---------- names ---------- */

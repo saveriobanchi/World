@@ -4,7 +4,7 @@
 const TINCT={or:'#d4aa3c',argent:'#ece6d6',gules:'#b3302a',azure:'#2a55a3',vert:'#2d7a46',sable:'#1d1c22',purpure:'#6b3a86',tenne:'#b8682a'};
 const METALS=['or','argent'],COLOURS=['gules','azure','vert','sable','purpure','tenne'];
 const DIVS=['plain','plain','pale','fess','bend','quarterly','chevron','chief','cross','saltire','bordure','fessbar','palebar','bendbar','gyronny'];
-const CHARGES={
+const RACE_CHARGES={
   human:['lion','eagle','stag','bear','tower','griffin','rose','key','bull','crown','castle','sword','boar','star','sun'],
   elf:['stag','unicorn','owl','leaf','moon','star','rose','harp','raven','pine','sun','oak','serpent'],
   dwarf:['anvil','hammer','axe','bear','tower','castle','key','bull','crown','star','dragon'],
@@ -16,8 +16,8 @@ const CHARGE_KEY={wolf:'c-wolf',howl:'c-howl',leaf:'c-leaf',pine:'c-pine',serpen
 function makeArms(race,parent){
   const metalFirst=chance(.5);
   const t1=metalFirst?pick(METALS):pick(COLOURS),t2=metalFirst?pick(COLOURS):pick(METALS);
-  const a={f:t1,s:t2,d:pick(DIVS),c:pick(CHARGES[race]),ct:null,mark:null};
-  if(parent){a.f=parent.f;a.s=parent.s;a.d=parent.d;a.c=chance(.6)?parent.c:pick(CHARGES[race]);a.mark=pick(['label','bordure','canton'])}
+  const a={f:t1,s:t2,d:pick(DIVS),c:pick(RACE_CHARGES[race]),ct:null,mark:null};
+  if(parent){a.f=parent.f;a.s=parent.s;a.d=parent.d;a.c=chance(.6)?parent.c:pick(RACE_CHARGES[race]);a.mark=pick(['label','bordure','canton'])}
   // the charge sits on the field: metal on colour, colour on metal
   const fieldIsMetal=METALS.includes(a.f);
   a.ct=['plain','chief','bordure','cross','saltire','fessbar','palebar','bendbar'].includes(a.d)?(fieldIsMetal?pick(COLOURS.filter(c=>c!==a.s)):pick(METALS)):(METALS.includes(a.s)?pick(COLOURS):pick(METALS));
@@ -50,7 +50,7 @@ function armsSVG(a,size,extra=''){
   const big=['plain','bordure','chief'].includes(a.d);
   const cs=big?54:44,cx=50-cs/2,cy=(a.d==='chief'?40:28)+(big?0:4);
   const key=CHARGE_KEY[a.c]||'c-'+a.c;
-  const charge=ICONS[key]?`<g transform="translate(${cx} ${cy}) scale(${cs/512})"><path d="${ICONS[key]}" fill="${ct}" stroke="${a.ct==='sable'?'rgba(255,240,210,.55)':'rgba(0,0,0,.4)'}" stroke-width="12"/></g>`:'';
+  const charge=CHARGES[key]?`<g transform="translate(${cx} ${cy}) scale(${cs/512})"><path d="${CHARGES[key]}" fill="${ct}" stroke="${a.ct==='sable'?'rgba(255,240,210,.55)':'rgba(0,0,0,.4)'}" stroke-width="12"/></g>`:'';
   let mark='';
   if(a.mark==='label')mark=`<path d="M22 14 H78 M30 14 V24 M50 14 V24 M70 14 V24" stroke="${a.ct==='argent'?TINCT.sable:TINCT.argent}" stroke-width="4" fill="none"/>`;
   else if(a.mark==='bordure')mark=`<path d="${SHIELD}" fill="none" stroke="${TINCT.argent}" stroke-width="6" stroke-dasharray="7 5"/>`;

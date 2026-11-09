@@ -1,37 +1,55 @@
 # The Living Atlas
 
-A fantasy world that runs by itself. Open `index.html` in a browser and watch it grow, fight, pray, trade and fall apart.
+A fantasy world that runs by itself. Open `index.html` in a browser and watch it grow, fight, pray, trade, starve, marry and fall apart.
 
-## What the world does
+Time passes in seasons, four to a year. At normal speed a year takes about four seconds, so history unfolds at a pace you can follow.
 
-Each world grows from a random seed: continents with ridged mountain chains, rivers that widen toward the sea, climates from glaciers to jungle, and resources (iron, gold, gemstones, timber, horses, spices, fisheries, wine). Peoples settle the land, and every second a few more years pass:
+## The world
 
-- **Realms**: humans, elves, dwarves, orcs and halflings found settlements, claim land, and grow from tribes into kingdoms and empires. Every realm has a procedurally drawn coat of arms with a proper blazon. Realms that break away inherit their parent's arms with a difference mark.
-- **Rulers and dynasties**: rulers have traits (Wise, Cruel, Ambitious, Builder, Seafarer…). They age and die, and each realm keeps its line of rulers. Succession crises and revolts split realms apart.
-- **Economy**: territory and cities fill a treasury. Roads link each realm's holdings. Caravan roads and sea lanes open between peaceful cities, adding wealth and goodwill. Treasuries pay for wonders, swell armies, and get looted, ransomed and paid as tribute.
-- **War**: wars start over borders, faith or old grudges, and allies honour their oaths. Armies gather at the front, cities are besieged, captured or razed, and whole realms fall.
-- **The sea**: harbour cities send colonists across the water to plant overseas colonies.
-- **Great people**: scholars write treatises, artists paint frescoes, generals win battles, explorers chart distant shores, and archmages unlock new magic. Sometimes an archmage blights the land with wild magic.
-- **Monsters and heroes**: dragons, giants, liches and sea serpents prey on towns. Heroes hunt them, and the famous ones may be raised to the throne.
-- **Faith, plague and climate**: prophets found religions, missionaries spread them, and heresies survive in secret. Plagues, famines, earthquakes, eruptions and floods strike. Long winters frost the map, and volcanic ash and magical blight scar the land for generations.
-- **Eras** are named after what defines them, such as a hegemon's ascendancy, an age of sails or the Frost Years.
+Each world grows from a random seed: continents with ridged mountain chains, rivers, climates from glaciers to jungle, and eight kinds of resources. Humans, elves, dwarves, orcs and halflings settle the land, and from there everything is simulated:
 
-## How to watch
+- **Seasons and food.** Regional weather drives each autumn's harvest. Granaries buffer bad years, and famine and hunger follow poor ones. Farmland spreads around growing towns and forests are cleared. You can watch the patchwork of fields grow on the map.
+- **Peoples.** Settlements hold a mix of peoples. Conquest and migration mix them, and minorities assimilate over generations. Hungry or restless towns send migrants to better places, even across borders.
+- **Realms, vassals and unions.** Tribes unite into kingdoms and kingdoms into empires. Small realms swear fealty to strong neighbours, pay tribute, follow their overlords to war, and sometimes rise in wars of independence. Long-loyal vassals may be peacefully absorbed.
+- **Rulers and dynasties.** Rulers marry, often into neighbouring dynasties, which brings alliances, and have heirs. Succession follows each people's law: primogeniture, elective councils, tanistry or elected mayors. Child rulers get regents. Rulers are assassinated, usurped or killed in battle. A ruler who dies childless can pass the crown to a foreign spouse's house, joining two realms in personal union.
+- **War.** Armies are raised from each realm's population and march across the map. They intercept each other, fight battles where terrain, generals, morale and metallurgy matter, and besiege cities, where walls and castles count. Campaigns run from spring to autumn and armies suffer in winter. Wars end through exhaustion, with tribute, vassalage or a stalemate.
+- **Economy.** Taxes, resources, markets and trade routes fill treasuries. These pay for armies, court upkeep and buildings: granaries, walls, temples, markets, harbours, mines, barracks, libraries, castles and universities. Neglected buildings fall into ruin. Wealthy realms commission wonders.
+- **Knowledge.** Five fields (agriculture, metallurgy, seafaring, arcana, letters) advance through scholars, libraries and universities, and spread along borders and trade routes. The first realm in the world to master a discovery goes down in the legends.
+- **Faith.** Prophets found faiths with tenets (pacifist, zealous, mercantile, scholarly and more) that shape how realms behave. Faiths have holy cities, spread through missionaries and temples, survive in secret, and split in schisms.
+- **Plague.** Epidemics travel city to city along roads and trade routes, then burn out, leaving survivors immune for a generation.
+- **Outlaws, monsters and heroes.** Bandits and pirates raid towns and shipping until they are hunted down. Dragons (with hoards), giants, liches and sea serpents prey on settlements. Heroes hunt them, and some are raised to the throne.
+- **Great people.** Scholars, artists, generals, explorers and archmages each change their realm in their own way.
+- **The wider world.** Long winters, eruptions, floods, great fires, festivals, tournaments, comets, eclipses, nomad hordes from the wastes and wild-magic blights all occur.
+- **Records.** The world keeps an almanac: greatest city, longest reign, bloodiest battle, deadliest plague and more.
 
-- **Map modes**: Realms, Peoples, Faiths, Trade, Population, Diplomacy (relative to the selected realm) and Terrain.
-- **Codex tabs**: *Chronicle* (filterable, with icons), *Realms* (sortable by population, territory, treasury or age), *Figures* (monsters, heroes and great people), *Ages* (a timeline of every realm's lifespan across the eras) and *Inspect* (a full page for any realm, city, ruin, war, monster or person).
-- **Follow** flies the camera to great events. **Clouds** toggles the drifting clouds. **Music** starts a generative soundtrack with cues for wars, coronations and catastrophes.
-- Scroll or pinch to zoom, drag to pan, and hover or click anything. Space pauses.
+## The interface
 
-The world is saved in your browser. When you come back it catches up (two years per minute away, up to 250) and summarises what happened.
+- **Map layers:** Realms (with vassals), Peoples, Faiths, Wars and armies, Diplomacy of the selected realm, Trade, Knowledge, Population and Terrain. Each layer has its own legend.
+- **On the map:** armies with banners, campaign lines and siege rings; outlaws; monsters; plague halos; farmland; drifting clouds; seasonal colours; coats of arms on capitals; a minimap.
+- **The codex:**
+  - *Chronicle:* grouped by year, filterable by importance and by domain.
+  - *Realms:* vassals nested under their overlords.
+  - *Figures:* sovereigns, armies, monsters, outlaws, heroes and great people.
+  - *Ages:* a timeline of every realm's life.
+  - *Almanac:* world statistics, shares of peoples and faiths, the frontier of knowledge, and records.
+- **Detail pages** cover every realm, city, army, war, monster, person and ruin, with back navigation.
+- **Search** with `/` or Ctrl/Cmd+K. Hover cards, toasts for great events, a follow camera and a generative soundtrack.
+- **Keyboard:** `Space` play/pause, `1`–`5` speed, `F` follow, `B` toggle the codex, `Esc` back.
+
+The world is saved in your browser and catches up while you are away: two years per minute, up to 250 years.
+
+## Design system
+
+- **Colour.** One dark theme with a single accent (candle-gold). Every event belongs to a domain (War, Politics, Society, Faith, Economy, Nature, Disaster, Magic, Monsters, Knowledge, Death). Each domain has one colour, used everywhere that event appears: chronicle chips, filters, toasts and map ripples.
+- **Type.** Fraunces for names in the world, Manrope for the interface, Geist Mono for numbers.
+- **Symbols.** Tabler Icons, one stroke weight, drawn the same way in the interface and on the map.
 
 ## Building
 
-The source lives in `src/` (`core`, `terrain`, `heraldry`, `sim`, `render`, `audio`, `ui`, `main`, plus `style.css` and `shell.html`). `./build.sh` inlines everything into `world.html` (the published page) and `index.html` (standalone).
-
-`src/icons.js` is generated by `tools/extract_icons.py` from the `@iconify-json/game-icons` npm package.
+The source lives in `src/`: `icons`, `core`, `data`, `terrain`, `heraldry`, `sim`, `render`, `audio`, `ui` and `main`, plus `style.css` and `shell.html`. `./build.sh` inlines everything into `world.html` (the published page) and `index.html` (standalone). `src/icons.js` is generated by `tools/extract_icons.py` from the `@iconify-json/tabler` and `@iconify-json/game-icons` npm packages.
 
 ## Credits
 
-- Icons: [game-icons.net](https://game-icons.net) by Lorc, Delapouite and contributors, licensed [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/).
-- Fonts: Uncial Antiqua, Cormorant, Alegreya Sans and JetBrains Mono from Google Fonts (SIL Open Font License).
+- Symbols: [Tabler Icons](https://tabler.io/icons), MIT licence.
+- Heraldic charges: [game-icons.net](https://game-icons.net) by Lorc, Delapouite and contributors, [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/).
+- Fonts: Fraunces, Manrope and Geist Mono from Google Fonts, SIL Open Font License.
